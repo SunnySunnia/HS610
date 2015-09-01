@@ -2,7 +2,8 @@
 ----------------------------------------------------  
 * Reading: Shortliffe: chapter 1 (M1), 12 & 17 (M2)   
 * Neehr Perfect Scavenger Hunt Excercise: Edit directly on doc. `Due Sept 14th`  
-```
+``` 
+Neehr Perfect & EHR01:
 usf account
 ```
 * EMR: electronic medical record
