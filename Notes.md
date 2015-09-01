@@ -7,7 +7,7 @@ Neehr Perfect & EHR01:
 usf account
 ```
 * EMR: electronic medical record  
-  #digital version of medical history  within an organization#    
+  #digital version of medical history  within an organization     
   Not easily shared with provider outside of a practice.  
 * EHR: electronic health record  
   #database/repository for health data#  
