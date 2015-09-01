@@ -1,2 +1,3 @@
-# HS610
-2015Fall
+# HS610  
+Perspectives	on	Health	Informatics  
+2015 Fall  
