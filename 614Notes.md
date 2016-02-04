@@ -31,4 +31,30 @@ Values will be electronically taken from lab report, solution will be generated 
 The pharmacy will receive a fax of the prescription and manually input to their system after double check. The workflow for the pharmacist will remain the same. Only the method of generating the prescription based on the best solution is being changed.   
 (User interface window where user will input patient information and calculate. Backend algorithms are executed once the user selects to calculate.)  
  
+**Quality improvement**  
+Measure quality/improvement to help clinician to better improve care.  
+Improvement: difference from baseline.  Time, etc.  
+Key performance indicator  
+Patient satisfation  
+
+**Interoperability**  
+Analytics  
+General mapping: ICD9 to ICD10  
+
+**Operations**  
+How much drug for inventory  
+Supply-chain  
+
+
+#TPN  
+**integrate machine learning**  
+- Identifying patients for whom the calculator will / will not work	 
+- Improving the ability to determine solubility based on how clinicians override values	
+- Timing user entry between fields and comparing with error rates to flag when an “inexperienced” user is identified	
+- Feel free to make something else up – be creative  
+- 
+
+
+
+
 
