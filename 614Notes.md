@@ -51,8 +51,8 @@ Supply-chain
 - Identifying patients for whom the calculator will / will not work	 
 - Improving the ability to determine solubility based on how clinicians override values	
 - Timing user entry between fields and comparing with error rates to flag when an “inexperienced” user is identified	
-- Feel free to make something else up – be creative  
-- 
+
+
 
 
 
