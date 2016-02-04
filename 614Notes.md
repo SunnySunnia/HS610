@@ -1,4 +1,4 @@
-#Five components:  
+Five components:  
 -  
 -**Inferencing method – How is the decision made?**    
 1. Information retrieval	- Lab printouts.   
