@@ -56,6 +56,8 @@ http://health.csusb.edu/dchen/368%20stuff/TPN%20calculation.htm
 http://clincalc.com/TPN/Macronutrients.aspx  
 http://www.rxkinetics.com/tpnosmolcalc.html  
 http://www.mc.vanderbilt.edu/documents/GSR/files/2013_IqbalJan9_TPN%20origin%20and%20calculations.pdf  
+http://www.merckmanuals.com/professional/nutritional-disorders/nutritional-support/total-parenteral-nutrition-(tpn)  
+
 
 
 
