@@ -51,6 +51,11 @@ Supply-chain
 - Identifying patients for whom the calculator will / will not work	 
 - Improving the ability to determine solubility based on how clinicians override values	
 - Timing user entry between fields and comparing with error rates to flag when an “inexperienced” user is identified	
+http://clincalc.com/TPN/Macronutrients.aspx  
+http://health.csusb.edu/dchen/368%20stuff/TPN%20calculation.htm  
+http://clincalc.com/TPN/Macronutrients.aspx  
+http://www.rxkinetics.com/tpnosmolcalc.html  
+http://www.mc.vanderbilt.edu/documents/GSR/files/2013_IqbalJan9_TPN%20origin%20and%20calculations.pdf  
 
 
 
