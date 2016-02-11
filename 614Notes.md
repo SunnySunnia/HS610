@@ -58,7 +58,19 @@ http://www.rxkinetics.com/tpnosmolcalc.html
 http://www.mc.vanderbilt.edu/documents/GSR/files/2013_IqbalJan9_TPN%20origin%20and%20calculations.pdf  
 http://www.merckmanuals.com/professional/nutritional-disorders/nutritional-support/total-parenteral-nutrition-(tpn)  
 
+#Algorithms： 
+**clustering**  
+- Given a bunch of data, can we identify a relationship between data element?  
 
+**Classification**  
+- Given a bunch of data, can we repicate a human expert in classifying a particular data element?  
+- label the data with the expected result so that the lgorithm can "learn" the approriate pattern.  
+- Support vector machines  
+- random forests  
+- logistic regression  
+- Neural Networks  
+- Deep Neural Networks  (graphical processing unit)  
+- 
 
 
 
