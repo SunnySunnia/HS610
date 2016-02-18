@@ -70,7 +70,16 @@ http://www.merckmanuals.com/professional/nutritional-disorders/nutritional-suppo
 - logistic regression  
 - Neural Networks  
 - Deep Neural Networks  (graphical processing unit)  
-- 
+
+
+#Evaluation of the algorithm:   
+- Silhouette score (-1 ~ 1): -1 --> overlap between clusters; 0 --> random, ineffective; 1 --> strong good cluster.  
+- Measures: snesitivity, specificity, precision, f-score-how good the overall system is.  
+- Confusion Matrix: TP, TN, FP, FN  
+- Multiclass confusion matrix: for each true category, what's the number of times that it has been predicted to be p1, p2, ...  
+- - p1, p2, ... = predicted categories.  
+- ROC/AUC  
+
 
 
 
