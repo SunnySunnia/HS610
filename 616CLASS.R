@@ -413,6 +413,193 @@ mtcars2$engine_size <- ifelse(mtcars$disp<145, "small", "large")
 #compare apply functions
 
 
+#Assign4############################################################
+#install.packages("dplyr")
+library(dplyr)
+library(ggplot2)
+
+# Variable Descriptions:
+# bwt Birth weight in ounces 
+# gestation Length of pregnancy in days 
+# parity 0 = first born, 1 = otherwise 
+# age mother's age in years 
+# height mother's height in inches 
+# weight Mother's pre-pregnancy weight in pounds 
+# smoke Smoking status of mother: 0 = not now, 1 = yes now
+
+#install.packages("downloader")
+library(downloader)
+url <- "https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/babies.txt"
+filename <- basename(url)
+download(url, destfile=filename)
+babies <- read.table("babies.txt", header=TRUE)
+
+# Substitute NA for the codes used to indicate missing data
+babies$gestation <- ifelse(babies$gestation==999, NA,babies$gestation)
+babies$age <- ifelse(babies$age == 99, NA,babies$age)
+babies$height <- ifelse(babies$height == 99, NA,babies$height)
+babies$weight <- ifelse(babies$weight == 999, NA,babies$weight)
+babies$smoke <- ifelse(babies$smoke == 9, NA,babies$smoke)
+max(babies$age, na.rm = TRUE) # max age is now reasonable
+
+babies2 = babies
+# Leave out outliers  x<220 and x>330
+babies2$gestation <- ifelse(babies2$gestation<220 | babies2$gestation> 330, NA,babies2$gestation) # alt: now 20 NA
+
+babies2$age.level <- factor( rep("early.20s",nrow(babies2)), ordered=T,levels =c("teens", "early.20s", "late.20s", "early.30s", "late.30s", "forty.plus"))
+babies2$age.level[babies2$age<20] <- "teens"
+babies2$age.level[babies2$age>=25 & babies2$age<30] <- "late.20s"
+babies2$age.level[babies2$age>=30 & babies2$age<35] <- "early.30s"
+babies2$age.level[babies2$age>=35 & babies2$age<40] <- "late.30s"
+babies2$age.level[babies2$age>=40] <- "forty.plus"
+babies2$age.level#optional, shows ordering
+
+
+#1 save babies2 as babies2.Rdata
+save(babies2,file = "babies2.Rdata")
+#   save babies2 as babies2.csv
+save(babies2, file = "babies2.csv")
+
+#2
+#select returns new df with subset of columns: like select in SQL
+# 2a select the 5 columns of babies2 from age to age.level inclusive
+select(babies2,4:8)
+
+# 2b select columns parity, smoke, age.level from  babies2 
+select(babies2, parity, smoke, age.level)
+
+# 2c select all columns except those 5 you selected in 2a
+select(babies2, -(4:8))
+
+# 2d select all columns except those 3 you selected in 2b
+select(babies2, -parity, -smoke, -age.level)
+
+#3
+#filter returns  new df that is subset of rows that meet logical condition: like where in SQL
+#filter babies2 to include all rows with age between 28 and 32 inclusive
+filter(babies2, age>=28 & age <=32)
+
+
+
+#4
+#arrange: return new df with rows reordered:: like  orderby in SQL, can use desc
+# Create babies3 by reordering babies2 by age level, then by descending gestation
+babies3=babies2 %>% arrange(age.level, desc(gestation))
+
+
+#5
+#rename: returns new df with variable(s) renamed *****************
+# 5a: Rename parity to is.firstborn, rename smoke to is.smoker
+babies3 = rename(babies3, is.firstborn = parity, is.smoker = smoke)
+# 5b: Use a non dplyr way: rename bwt to birthweight
+names(babies3)=ifelse(names(babies3)=="bwt","birthweight", names(babies3))
+
+
+#6
+#mutate: return new df with transformed or new variables 
+# Mutate babies3 so that the mean height is subtracted from each value for height
+babies3=mutate(babies3,height=height-mean(height,na.rm = T))
+
+# Look at your babies3 and make sure you have modifed it but haven't rendered the data unusable
+
+
+
+#7 new variable:
+#Mutate babies2to add a new factor variable named birth.size
+# such that bwt>120 is large and  bwt <= 120 is small
+babies2 = mutate(babies2, birth.size = factor(ifelse(bwt>120,"large", "small")))
+
+
+#8
+# group_by:takes an existing tbl and converts it into a grouped tbl
+#  where operations are performed "by group". 
+#  Returns the converted grouped tbl
+# 8a: Create group babies2 by age.level and store in new variable resultset 
+resultset = babies2 %>% group_by(age.level)
+# 8B: Summarize resultset: provide for each group the med.weight and 
+#  med.gest, which are output names for median weight and median gestation.
+# Look at your output and make sure you do not have NAs.
+resultset %>% summarize(med.weight=median(weight, na.rm=T),
+                        med.gest=median(gestation, na.rm=T))
+# 8c: Now use the same command to summarize babies2 
+babies2 %>% summarize(med.weight=median(weight, na.rm=T),
+                      med.gest=median(gestation, na.rm=T))
+# 8d: write a brief sentence on the difference in summarizing babies2 and resultset
+
+#8d#Summarizing babies2 will give the medians of the whole dataset, however, resultset
+##has been grouped, so summarizing resultset will give medians to each group of the dataset.
+
+
+#9 pipeline operator %>% 
+#Use a piped expression to selct the following information:
+# select birthweight , gestation 
+#  from babies3 
+#  where weight > median(weight) and is.smoker == T and age.level==early.20s
+#   order by gestation
+babies3 %>% filter(weight > median(weight,na.rm=T) & 
+                     is.smoker==1 & age.level == "early.20s")%>% 
+  select(birthweight, gestation)  %>% arrange(gestation)
+
+
+#10 boxplots
+#Create 3 boxplot for the variable gestation as follows:
+# 10a: create a plot containing side-by-side boxplots for each of the 6 age.levels
+ggplot(babies2, aes(x=age.level,y=gestation, fill=age.level)) + geom_boxplot()
+
+# 10b: create a plot containing side-by-side boxplots for the 2 smoke levels
+ggplot(babies2, aes(x=smoke,y=gestation, fill=as.factor(smoke))) + geom_boxplot()
+
+# 10c: create a plot containing side-by-side boxplots for the 2 parity levels
+ggplot(babies2, aes(x=parity,y=gestation, fill=as.factor(parity))) + geom_boxplot()
+
+
+
+#11 apply functions:
+# 11a Use one of the apply functions to find the min of each column of babies2
+apply(babies2, 2, min,na.rm=T)
+
+# 11b Use one of the apply functions to find the max of each column of babies2
+apply(babies2, 2, max, na.rm=T)
+
+# 11c Use one of the apply functions to find the mean of each column of babies2
+apply(apply(babies2,2,as.numeric), 2, mean, na.rm=T)
+
+# 11d Use one of the apply functions to find the median of each column of babies2
+apply(apply(babies2,2,as.numeric), 2, median, na.rm=T)
+
+# 11e Use one of the apply functions to find the standard deviation of each column of babies2
+apply(apply(babies2,2,as.numeric), 2, sd,na.rm=T)
+
+#12 
+#12a: Create a vector named A of 20 randomly generated numbers
+#  drawn from the normal distribution
+A=rnorm(20)
+
+#12b: Create a vector named B containing the string "hello world!"
+B=c("hello world!")
+
+#12c: Create a vector named C that is a matrix of numbers
+#  from 1 to 20  in 4 rows and 5 columns
+C=matrix(1:20, nrow=4, ncol=5)
+
+#12d: Create a list named lst that is composed of items A,B and C 
+lst=list(A,B,C)
+
+#12e: Use one of the functions in the apply family to determine
+#  the mean of each element of lst
+lapply(lst, mean)
+
+#13 Create a user-defined function to print out the min, max, mean and median
+# of a parameter you name dat. Call your function passing in babies
+f13=function(dat){
+  return(c(min(dat,na.rm=T), max(dat,na.rm=T), mean(as.numeric(dat),na.rm=T),median(as.numeric(dat),na.rm = T)))
+}
+apply(babies, 2, f13)
+#it prints the results from one function of each column in a row
+#-->4 rows, one row for one function from {min, max, mean, median}
+
+
+
 #5_1###########################################################
 setwd("C:/HS616/LectureCodes")
 # debugging: reproducibility set seed for pseudo-random numbers
@@ -452,9 +639,11 @@ pnorm(0,10,4)    #probability < 0 in normal distribution(mean=10, sd=4)
 hist(rnorm(10000,10,4), 40, ylim=c(0,4000), xlim=c(-10,30))  #####note the spread of the function#####
 
 # dnorm returns the height of the normal curve at a RV.
+hist(r1, freq = F)
 dnorm(0)
+hist(rnorm(10000,10,4),freq = F)
 dnorm(0,10,4)
-
+dnorm(10,10,4)
 
 # Create a data frame of the size you need, fill in as you go
 data.frame(matrix(NA, nrow = 2, ncol = 3))
