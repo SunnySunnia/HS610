@@ -461,6 +461,7 @@ save(babies2,file = "babies2.Rdata")
 save(babies2, file = "babies2.csv")
 
 #2
+library(dplyr)
 #select returns new df with subset of columns: like select in SQL
 # 2a select the 5 columns of babies2 from age to age.level inclusive
 select(babies2,4:8)
@@ -687,4 +688,80 @@ runif()
 
 lapply(1:4, runif)
 lapply(1:4, runif, min=-1,max=1)
+
+#5_2##############################################################
+data (mtcars) 
+
+# creates a vector of labels for 1000 elements 
+rep("label1",10)
+
+# combines two vectors made up of repetitions into one
+c((rep("label1",10)),(rep("label2",5)))
+
+rnorm1 <- rnorm(1000, mean=100, sd=15)
+hist(rnorm1, probability=TRUE)
+#we want to draw a line to approximate the density function
+# generate 100 xxvalues from min(x) to max(x)
+xx <- seq(min(rnorm1), max(rnorm1), length=100)
+yy <- dnorm(xx, mean=100, sd=15)
+# draws a line on the most recent plot (similarly to abline)
+lines(xx, yy)# creates a line from the (xx,yy) points
+
+
+# Plots for the standard normal distribution
+# source: ___________________
+set.seed(3000)
+xseq<-seq(-4,4,.01)
+densities<-dnorm(xseq, 0,1)
+cumulative<-pnorm(xseq, 0, 1) # always increasing
+randomdeviates<-rnorm(1000,0,1)
+
+par(mfrow=c(1,3), mar=c(3,4,4,2))
+plot(xseq, densities, col="darkgreen",xlab="", ylab="Density", type="l",lwd=2, cex=2, main="PDF of Standard Normal", cex.axis=.8)
+plot(xseq, cumulative, col="darkorange", xlab="", ylab="Cumulative Probability",type="l",lwd=2, cex=2, main="CDF of Standard Normal", cex.axis=.8)
+hist(randomdeviates, main="Random draws from Std Normal", cex.axis=.8, xlim=c(-4,4))
+
+
+
+binom1 <- rbinom(1000, 100, .5)
+# Since this is a discrete function we have a probability function (PF) 
+#     (also known as probability mass function)
+#  rather than a probablility density function (PDF)
+# dbinom looks up P(X = 20) when X is drawn from 
+#    binomial(100, 0.2) distribution.
+dbinom(50, 100, .5) # probability that number of successes=20
+# over 100 trials, each trial having probability of success = .2
+hist(binom1) # does this surprise you?
+# Will a different histogram be more informative about dbinom?
+hist(binom1, freq = F, 100)
+dbinom(27, size=100, prob=0.25)
+
+
+
+
+# Shapiro-wilk test for normality 
+# non-missing values must be between 3 and 5000
+# p-value gives us probablilty that the distribution is normal
+# tests the NULL hypothesis that the samples came from a Normal distribution
+#  This means that if your p-value <= 0.05, then reject the NULL hypothesis 
+#   and conclude your sample is likely to be from a non-normal distribution
+r1 <- rnorm(5000,10,4)
+shapiro.test(r1)
+#Normal Q-Q plot: plot against theoretical quantiles
+#  qqline draw straight line, color=red
+qqnorm(r1); qqline(r1, col = 2,lwd=2)
+par(mfrow=c(1,1))
+qqnorm(rnorm(1000,10,4)); qqline(rnorm(1000,10,4), col = 2,lwd=2)
+qqnorm(runif(1000)); qqline(runif(1000), col = 2,lwd=2)
+qqnorm(rpois(1000,1)); qqline(rpois(1000,1), col = 2,lwd=2) 
+qqnorm(rbinom(1000,30, .5)); qqline(rbinom(1000,30, .5), col = 2,lwd=2) 
+
+
+#A poisson distribution is for count data, 
+# lambda is both mean and variance.
+pois1<- rnorm(100,1)
+pois2<- rnorm(100,10)
+par(mfrow=c(1,2))
+hist(pois1)
+hist(pois2)
 
