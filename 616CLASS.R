@@ -765,3 +765,354 @@ par(mfrow=c(1,2))
 hist(pois1)
 hist(pois2)
 
+###################################################################
+##Assign 5 #######################
+#setwd("C:/Users/vhasfczengs/Downloads")
+library(ggplot2)
+
+#1a
+norm1 = rnorm(1000, 0,1)
+#1b
+norm2 = rnorm(1000, 5,3)
+#1c
+par(mfrow=c(1,2))
+hist(norm1,xlim = c(-6, 16),ylim=c(0,260))
+hist(norm2,xlim=c(-6,16),ylim=c(0,260))
+
+#2a
+d1=data.frame(norm1)
+names(d1)="norm"
+d1$index=rep("norm1",1000)
+d2=data.frame(norm2)
+names(d2)="norm"
+d2$index=rep("norm2",1000)
+data4hist=data.frame(rbind(d1, d2))
+
+g = ggplot(data4hist,aes(norm, fill =index ))
+g+geom_histogram(binwidth=.5, position="dodge")
+
+#2b
+g+geom_histogram(binwidth=.5, position="identity")
+
+#3
+norm3 = rnorm(100,20,10)
+
+#4a
+d1=data.frame(norm1)
+names(d1)="norm"
+d1$index=rep("norm1",1000)
+d3=data.frame(norm3)
+names(d3)="norm"
+d3$index=rep("norm3",100)
+data4hist2=data.frame(rbind(d1, d3))
+
+g = ggplot(data4hist2,aes(norm, fill =index ))
+g+geom_density()
+
+#4b
+g+geom_density(alpha=0.4)
+
+#5a
+pnorm(1, mean(norm1),sd(norm1))
+
+#5b
+pnorm(1,mean(norm2),sd(norm2))
+
+#5c
+##Because norm1(0,1) and norm2(5,3) have different distributions. 
+##norm1 is centered at 0 and spread with sd =1 while norm2 is centered at 5 and spread with sd=3.
+##1 will be greater than more than half of the ditribution in norm1 while is relatively further less from the center in norm2. 
+##So it is more likely a random number from norm1 will be less than 1 than one from norm2.
+
+
+#6
+cumnorm1=pnorm(norm1,mean(norm1),sd(norm1))
+cumnorm2=pnorm(norm2,mean(norm2),sd(norm2))
+dennorm1=dnorm(norm1,mean(norm1),sd(norm1))
+dennorm2=dnorm(norm2,mean(norm2),sd(norm2))
+par(mfrow=c(1,2))
+plot(norm1,dennorm1, main = "PDF of norm1", col = "purple", pch=20)
+abline(v=1)
+plot(norm1, cumnorm1, main="CDF of norm1", col="light green", pch=20)
+abline(h=pnorm(1, mean(norm1),sd(norm1)))
+abline(v=1)
+
+par(mfrow=c(1,2))
+plot(norm2,dennorm2, main = "PDF of norm2", col = "purple", pch=20)
+abline(v=1)
+plot(norm2, cumnorm2, main="CDF of norm2", col="light green", pch=20)
+abline(h=pnorm(1, mean(norm2),sd(norm2)))
+abline(v=1)
+##The PDF plots showed that 1 will be greater than more than half of the ditribution in norm1 while is relatively further less from the center in norm2. 
+##The CDF plots actually showed the probabilties of have a random number that is less than 1 in the two distribution. 
+
+
+#7
+pnorm(1, 0, 1)
+qnorm(pnorm(1,0,1))
+pnorm(qnorm(pnorm(1,0,1)))
+##Applying qnorm to the result from pnorm of 1 on Normal(0,1) will return back 1.
+
+#8 
+dnorm(0,mean(norm1),sd(norm1))
+
+#9a
+pnorm(mean(norm3)+sd(norm3),mean(norm3), sd(norm3))-pnorm(mean(norm3)-sd(norm3),mean(norm3), sd(norm3))
+
+#9b
+pnorm(mean(norm3)+2*sd(norm3),mean(norm3), sd(norm3))-pnorm(mean(norm3)-2*sd(norm3),mean(norm3), sd(norm3))
+
+#9c
+pnorm(mean(norm3)+3*sd(norm3),mean(norm3), sd(norm3))-pnorm(mean(norm3)-3*sd(norm3),mean(norm3), sd(norm3))
+
+
+#10a
+unif1=runif(1000,0,1)
+
+#10b
+unif2=runif(1000,20,30)
+
+#11
+par(mfrow=c(1,1))
+boxplot(unif1,unif2, main="Comparison of unif1 vs unif2", names=c("unif1","unif2"))
+
+#12a
+pois1 = rpois(1000,1)
+#12b
+pois2 = rpois(1000,30)
+
+
+#13a
+par(mfrow=c(1,1))
+boxplot(pois1, pois2, main="Comparison of pois1 vs pois2", names=c("pois1","pois2"))
+
+d1=data.frame(pois1)
+names(d1)="norm"
+d1$index=rep("pois1",1000)
+d2=data.frame(pois2)
+names(d2)="norm"
+d2$index=rep("pois2",1000)
+data4hist=data.frame(rbind(d1, d2))
+
+g = ggplot(data4hist,aes(norm, fill =index ))
+g+geom_histogram(binwidth=0.8, position="dodge")+ggtitle("Distributions")
+
+#13b
+##pois1 has a more skewed shape while pois2 has a more symmetric shape.
+
+#14a
+binom1=rbinom(1000,100, 0.2)
+#14b
+binom2=rbinom(1000,100, 0.8)
+
+
+#15
+d1=data.frame(binom1)
+names(d1)="norm"
+d1$index=rep("binom1",1000)
+d2=data.frame(binom2)
+names(d2)="norm"
+d2$index=rep("binom2",1000)
+data4hist=data.frame(rbind(d1, d2))
+
+g = ggplot(data4hist,aes(norm, fill =index ))
+g+geom_histogram(binwidth=0.8, position="dodge")+ggtitle("Distributions")
+
+
+#16
+bern1 = rbinom(1000,1000,0.5)
+
+#17
+rand.dist = data.frame(norm1, unif1, pois1, binom1, bern1)
+
+#18
+summary(rand.dist)
+
+#19
+library (reshape2)
+rand.long=melt(rand.dist)
+ggplot(rand.long,aes(x = value)) + 
+  facet_wrap(~variable,scales = "free") +  # NB: scales = "free"
+  geom_histogram(binwidth=0.3, fill="#9999CC")
+
+
+#20
+apply(rand.dist, 2, shapiro.test)
+##Cannot reject the hypothesis that norm1 and bern1 are from a normal distribution.
+##But we cannot reject the hypothesis that unif1, pois1, and binom1 are from a normal distrubution.
+
+
+#############################################################
+####6_1 #############
+setwd("C:/HS616/LectureCodes")
+norm1 <- rnorm(1000)
+norm2 <- rnorm(1000,5,3) 
+norm3 <- rnorm(100, mean=20, sd=10) 
+
+df_norm <- data.frame(norm1,norm2, norm3)
+
+# Get summary statistics for df_norm
+summary(df_norm)  ######## ######## ######## ######## ########
+
+# Use apply to get the varianceof each distibution
+#  NB: that apply must have a function arguement to apply: use variance
+apply(df_norm,2,var)   ######## ######## ######## ######## ########
+
+library (reshape2)
+babies2 = babies
+#babies2 <- read.csv("babies2.csv")
+# BTW, summary automatically removes NAs from min, max, mean, etc
+summary(babies2)
+
+cor(babies2[2:7]) #default is "everything"
+cor(babies2[2:7], use="everything") #NA if either column has any NA
+cor(babies2[2:7], use="all.obs") # Error if a single NA in any column
+# Next two lines keep only *rows* where every entry is not NA
+cor(babies2[2:7], use="na.or.complete")
+cor(babies2[2:7], use="complete.obs") # Error if there is no row that is complete
+
+#install.packages("GGally")
+library (GGally)
+
+# cat vs cat:  bar, box
+# cat vs numeric: boxplot , hist
+# numeric vs numeric: scatter, cor
+babies2$smoke <- factor(babies2$smoke)
+ggpairs(babies2[6:7])
+
+# One sample t-test to test null hypothesis that true mean is
+# equal to an expected value
+# Reject null hypothesis if p-value < alpha
+t.test(babies2$age, mu=28) # reject null hypothesis? yes
+t.test(babies2$age, mu=15) # reject null hypothesis? yes
+t.test(babies2$age, mu=27) # reject null hypothesis? no
+
+# draw a random sample from a distibution
+norm1 <- rnorm(10000) # defaults to standard normal distribution
+
+# Density plot shows the density of the 10,000 points sampled from the distribution
+# shows density of points near a given value on x axis
+hist (norm1,100, freq=F)
+hist (norm1,100)
+
+#calculated on the standard normal distribution, not the *sample* norm1
+#returns the quantile, ie: the number
+# whose cumulative distribution matches the probability
+# what quantile has cumulative distribution of .25?
+qnorm(.25) # -0.6744898 is the quantile returned
+pnorm(-0.6744898) # pnorm of quantile gives us back the cum prob 
+# both preceding lines default to standard normal distribution
+
+# Kernel density plot: estimate density function of unknown distribution
+#  based on data sample: data smoothing, inferences about population are made 
+plot(density(norm1)) # calculated on sample norm1
+
+# Density plot: Utilizing the distribution from which sample is drawn
+# We want to draw a smooth line for the density function:
+# Generate 200 xxvalues from min(norm1) to max(norm1)
+xx <- seq(min(norm1), max(norm1), length=200)
+# generate the height of the density function at each of these points
+# So we have 200 (xx,yy) points that **span the range of
+#  the density function** for this distribution (standard normal)
+yy <- dnorm(xx, mean=0, sd=1)
+# draws a line on the most recent plot (similarly to abline)
+hist (norm1,100, freq=F)
+lines(xx, yy, col=2)# creates a smooth line from the (xx,yy) points
+
+# With large sample size we get a simlar plot with ggplot2 density
+#  plot, but not usually with small sample size  ***********
+normtemp<- rnorm(10)
+plot(density(normtemp)) # calculated on sample normtemp
+r_df <- data.frame(norm1, normtemp)
+ggplot(r_df, aes(x=norm1)) + geom_density() # density of sample norm1
+ggplot(r_df, aes(x=normtemp)) + geom_density() # density of sample normtemp
+# There is a difference between a sample and 
+#  the population it is drawn from  *****************************
+
+
+#################################################################
+### 6_2 ##########################
+# z-score (standard score)
+# Can compare two scores from different *normal* distributions
+# We are basically mapping the distribution to the standard normal
+
+# standard normal distribution
+norm2 <- rnorm(10000,10,4)
+summary(norm2)
+m <- mean(norm2)
+s <- sd(norm2)
+# z-score(1): val is how many SDs above the mean?
+val <- 18
+z <- (val - m)/s  
+z
+
+# normal distribution with mean=30 and sd=3
+norm3 <- rnorm(10000, 30,3)
+summary(norm3)
+m <- mean(norm3)
+s <- sd(norm3)
+# What value in this distribution is comparable to val of norm1?
+# Use formula for z z-score, solve for s
+x <- z*s + m
+x
+# Check:
+z <- (x - m)/s  # 33 is how many SDs above the mean?
+z
+
+
+#The p-value is the probability that the observed data could happen,
+# under the condition that the null hypothesis is true
+#alpha (significance level) the probability of making a type1 error
+# type I error is detecting an effect that is not present
+# alpha, simply stated, is the probability of making a wrong decision
+
+#setwd("/Users/Pat/Documents/R/HS_616/assign")
+babies <- read.table("babies.txt", header=TRUE)
+
+babies2 <- read.csv("babies2.csv")
+babies2<-babies2[, -1]  
+summary(babies2)
+
+s <- sd(babies2$bwt)
+stats<-summary(babies2$bwt)
+m <- stats[4]  
+m
+
+# One sample t-test to test null hypothesis that true mean is
+# equal to an expected value
+# Reject null hypothesis if p-value < alpha
+t.test(babies2$age, mu=28) # reject null hypothesis?
+t.test(babies2$age, mu=15) # reject null hypothesis?
+t.test(babies2$age, mu=27) # reject null hypothesis?
+
+t.test(babies$bwt, babies2$bwt)
+
+
+###########################################################################
+####7_1#############
+set.seed(100)
+
+m <- 1
+b <- 0
+x <- rnorm(20)	
+#Generate line with slope m,intercept b, and random noise
+y <- m*x + b + rnorm(length(x), mean=0, sd=1)
+
+#
+plot(x,y) # with noise
+abline(b, m, lty=2, col="green") # original line
+#qqplot can show how normally the residuals is distrubuted.
+
+fit<- lm (y~ x)
+c <-coef(fit)
+abline(b=c[2],a=c[1])
+summary(fit) # data fits linear model with R^2 0.6696
+
+# Good fit to a linear model
+# Not as good a fit to the line data originated from (green)
+library (ggplot2)
+df <- data.frame(x,y)
+g <- ggplot(df,aes(x=x, y=y))
+g + geom_point() + 
+  geom_abline(intercept=c[1],slope=c[2]) +
+  geom_abline(intercept=b, slope=m, lty=2, col="green")
