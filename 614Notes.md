@@ -81,6 +81,7 @@ http://www.merckmanuals.com/professional/nutritional-disorders/nutritional-suppo
 - ROC/AUC  
 
 
+**Sensitivity, specificity, precision, etc:  
 Test 99% sensitivity: given someone has the disease, there is 99% of time that the condition will catch that disease:  
 	for all patient that have "HPP", 99% of the time will be caught be condition "low ALP"  
 	P(lowALP|HPP) = 99%  
