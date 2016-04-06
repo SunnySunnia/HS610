@@ -1116,3 +1116,604 @@ g <- ggplot(df,aes(x=x, y=y))
 g + geom_point() + 
   geom_abline(intercept=c[1],slope=c[2]) +
   geom_abline(intercept=b, slope=m, lty=2, col="green")
+
+
+###########################################################
+##7_1##
+#test whether the variances of two samples are the same.
+var.test()
+
+
+#################################################################
+###Assign8###
+#1
+testdat = read.delim("sample.txt", stringsAsFactors=FALSE)
+
+#2
+fit1 = lm(Pass~Hours, data=testdat)
+
+#3
+summary(fit1)
+## Pass_hat = -0.15394 + 0.23460*Hours
+
+#4
+##For every unit increase in hours studies, Pass increases by 0.23460.
+
+#5
+pred1 = predict(fit1, type="response")
+
+#6
+df4plt=data.frame(testdat,pred1)
+g = ggplot(data = df4plt,aes(x=Hours, y=Pass))
+g+geom_point()+geom_point(aes(x=Hours, y = pred1), color="red")
+##Since the true Pass is binary, the ones with value 0 have negative residuals while the ones
+###with value 1 have positive residuals.
+
+#7
+plot(fit1)
+##The residual vs fitted graph is a sinusoid. It matches to the plot from #6: there are
+### 2 discete groups of points giving opposite residuals. 
+
+#8
+#(i) No, the relationship between dependent and independent variable is not linear.
+#(iv) No, the error distribution, from the residual qq-plot, is not normal.
+
+#9
+fit2 = glm(Pass ~ Hours, data = testdat, family = binomial())
+
+#10
+summary(fit2)
+#log(p(pass)/p(fail) ) = 1.5046 * Hours + (-4.0777)
+
+#11
+## For every unit increase in hours studied, the log odds of passing increases by 1.5046.
+
+#12
+pred2 = predict(fit2, type="response")
+
+#13
+df4plt=data.frame(testdat,pred2)
+g = ggplot(data = df4plt,aes(x=Hours, y=Pass))
+g+geom_point()+geom_point(aes(x=Hours, y = pred2), color="red")
+
+#14
+logisticPseudoR2s(fit2)
+#Pseudo R^2 for logistic regression
+#Hosmer and Lemeshow R^2   0.421 
+#Cox and Snell R^2         0.442 
+#Nagelkerke R^2            0.589 
+
+#fit1 adjusted R^2 0.4459
+##It seems reasonable. The predicted line is curved towards the two groups for 
+##the glm model, it will capture more variance than the lm model with the staright line.
+###
+
+
+#15
+#Survival analysis: time from birth to marriage.
+#Graphical representation of survival curve for each cohort.
+#Kaplan-Meier estimation.
+#predicting hazard function from the cohort of the previous decade: the hazard function hasn't 
+#change much for late marriagers.
+
+
+###############################################################
+##quiz 8##
+setwd("C:/Users/ho200/Downloads")
+quiz8_dat = read.delim("quiz8_dat.txt", stringsAsFactors=FALSE)
+
+library(ggplot2)
+library(dplyr)
+#1
+class(quiz8_dat$Scored)
+quiz8_dat = mutate(quiz8_dat, scored_bin = ifelse(quiz8_dat$Scored=="Scored ",1,0))
+hist(quiz8_dat$scored_bin)  
+plot(quiz8_dat$PSWQ,quiz8_dat$scored_bin)
+plot(quiz8_dat$Anxious, quiz8_dat$scored_bin)
+plot(quiz8_dat$Previous,quiz8_dat$scored_bin)
+
+#2
+cor(quiz8_dat[,1:3])
+
+
+#3
+
+#Because the response variable is binary, use logistic regression
+
+
+fit2 = glm(scored_bin ~ PSWQ + Anxious + Previous, data = quiz8_dat, family = binomial())
+summary(fit2)
+pred2 = predict(fit2, type="response")
+df4plt=data.frame(quiz8_dat,pred2)
+g = ggplot(data = df4plt,aes(x=PSWQ, y=scored_bin))
+g+geom_point()+geom_point(aes(x=PSWQ, y = pred2), color="red")
+
+#Since only the PSWQ is significant, consider another model only uses PSWQ as the predictor
+fit2 = glm(scored_bin ~ PSWQ, data = quiz8_dat, family = binomial())
+summary(fit2)
+pred2 = predict(fit2, type="response")
+df4plt=data.frame(quiz8_dat,pred2)
+g = ggplot(data = df4plt,aes(x=PSWQ, y=scored_bin))
+g+geom_point()+geom_point(aes(x=PSWQ, y = pred2), color="red")
+
+
+#4 
+summary(fit2)
+## only PSWQ is significant
+
+#5
+##For full model
+#log(p(scored)/p(missed) ) = -0.25137 * PSWQ + 0.27585 * Anxious +0.20261 * Previous -11.49256 
+
+
+
+#############################################################
+##9_1##
+#logistic regression: for categorical response variable.
+#does not make assumption of normality, linearity, and homogeneity of variance
+#needs twice as many observation as linear regression
+# binary and ordinal logistic regression.
+# error terms independent: independent variables.
+# log(p(disease)/(1-p(disease))) = beta_0 +beta_1 * X_1 + .....
+# 
+
+
+
+#############################################################
+##9_2###
+#setwd(UsersPatDocumentsRHS_616lecture_scripts)
+setwd("C:/Users/ho200/Downloads")
+
+#install.packages("ppcor")
+library (ppcor)
+library(ggplot2)
+library(reshape2)
+
+
+logisticPseudoR2s <- function(LogModel) {
+  dev <- LogModel$deviance 
+  nullDev <- LogModel$null.deviance 
+  modelN <-  length(LogModel$fitted.values)
+  R.l <-  1 -  dev / nullDev
+  R.cs <- 1- exp ( -(nullDev - dev) / modelN)
+  R.n <- R.cs / ( 1 - ( exp (-(nullDev / modelN))))
+  cat("Pseudo R^2 for logistic regression\n")
+  cat("Hosmer and Lemeshow R^2  ", round(R.l, 3), "\n")
+  cat("Cox and Snell R^2        ", round(R.cs, 3), "\n")
+  cat("Nagelkerke R^2           ", round(R.n, 3),    "\n")
+}
+
+# PSWQ: degree to which the player worries in general
+# Anxious: new measure of the player's anxiety just before the penalty kick
+# Previous: percentage of penalties scored by the player over their career
+# Scored: outcome: whether the penalty kick scored
+
+#penalties <- read.table(file="penalty.txt", header = T)  # tab-delimited file with a header
+penalties =  read.delim("quiz8_dat.txt", stringsAsFactors=FALSE)
+
+
+# Exploratory visualizations
+g <- ggplot(data=penalties)
+g + geom_histogram(aes(x=PSWQ),binwidth=1, color = 5)  
+
+g + geom_histogram(aes(x=PSWQ, fill=Scored),binwidth=1,position="dodge")  # position="identity" for overlaid
+g + geom_histogram(aes(x=Anxious, fill=Scored), binwidth=1,position="dodge")
+g + geom_histogram(aes(x=Previous, fill=Scored), binwidth=1,position="dodge")
+
+g + geom_density(aes(x=PSWQ, fill=Scored), alpha=.5)   
+g + geom_density(aes(x=Anxious, fill=Scored), alpha=.5)  
+g + geom_density(aes(x=Previous, fill=Scored), alpha=.5)   
+
+# Tests for normality of data
+shapiro.test(penalties$PSWQ)
+shapiro.test(penalties$PSWQ[penalties$Scored=="Scored "])
+shapiro.test(penalties$PSWQ[penalties$Scored=="Missed "])
+shapiro.test(penalties$Anxious[penalties$Scored=="Scored "])
+shapiro.test(penalties$Anxious[penalties$Scored=="Missed "])
+shapiro.test(penalties$Previous[penalties$Scored=="Scored "])
+shapiro.test(penalties$Previous[penalties$Scored=="Missed "])
+
+# T-tests to compare values of scored with missed
+t.test(PSWQ ~ Scored, data=penalties) #default var.equal=F
+t.test(Anxious ~ Scored, data=penalties)
+t.test(Anxious ~ Scored, data=penalties, var.equal=T)
+t.test(Previous ~ Scored, data=penalties)
+
+
+
+# Look for Correlations and partial correlations
+cor(penalties[-4]) 
+pcor(penalties[-4])     
+# accounts for the effect of controlled-for variables on both of the compared vars   
+pcor(penalties)  
+penalties = mutate(penalties, Scored = ifelse(quiz8_dat$Scored=="Scored ",1,0))
+
+#cor and pcor require that dichotomous variables be coded as 0,1
+cor.test(penalties$Scored, penalties$Previous) 
+
+#recode column Scored as 0,1
+
+cor(penalties)
+pcor(penalties) 
+cor.test(penalties$Scored, penalties$Anxious)
+cor.test(penalties$Scored, penalties$PSWQ) # method="spearman" alsmost same
+# r= -0.6676552 so R^2= 0.4457635: PSWQ accounts for 44.6% of the variabliltiy of Scored
+
+# Variable selection: start with all variables, then see how the 
+#  model is effected if we leave one out
+# AIC (Akaike information criterion): relative estimate of information lost 
+#    smaller is good: less informaiton lost
+fit_all <- glm(Scored ~ ., family=binomial(link="logit"), data=penalties)
+summary(fit_all)  #AIC: 55.416
+# log (p(Scored)/p(Missed) ) = -0.25137 PSWQ 
+#  for other estimated coef, they are likely to have this fit by chance
+
+fit.minus.prev <- glm(Scored ~ . -Previous, family=binomial(link="logit"), data=penalties)
+summary(fit.minus.prev) #AIC: 56.074
+# log (p(Scored)/p(Missed) ) = -0.2264 PSWQ -0.1190 Anxious 
+
+fit.minus.anxious <- glm(Scored ~ . -Anxious, family=binomial(link="logit"), data=penalties)
+summary(fit.minus.anxious) # AIC: 54.662 # best of these models that have intercept
+# log (p(Scored)/p(Missed) ) = -0.23009  PSWQ + 0.06480 Previous 
+
+# fit.minus.anxious.inter <- glm(Scored ~ . -Anxious -1, family=binomial(link="logit"), data=penalties)
+# summary(fit.minus.anxious.inter) # AIC: 53.255  # best of these models
+# # log (p(Scored)/p(Missed) ) = -0.18223  PSWQ + 0.07639 Previous **********
+# # Visualize the relationship of PSWQ to Scored  ******
+# # overlaid with the probablilities of scoring as predicted by model
+# pred_best <- predict(fit.minus.anxious.inter, type="response") 
+# gbest <- ggplot(penalties, aes(x=I(-0.18223*PSWQ+0.07639*Previous), y=Scored))
+# gbest +  geom_point()  +
+#   geom_point(aes(x=I(-0.18223*PSWQ+0.07639*Previous), y= pred_best), color="red") 
+
+fit.minus.PSWQ <- glm(Scored ~ . -PSWQ, family=binomial(link="logit"), data=penalties)
+summary(fit.minus.PSWQ) # AIC: 67.141
+# all estimated coef are likely to have this fit by chance
+
+fit.PSWQ <- glm(Scored ~ PSWQ, family=binomial(link="logit"), data=penalties)
+summary(fit.PSWQ) # AIC: 64.516
+# log (p(Scored)/p(Missed) ) = -0.29397  PSWQ + 4.90010
+# Use this model to pridict the probablilities of scoring vs PSWQ
+pred <- predict(fit.PSWQ, type="response") 
+g<- ggplot(penalties, aes(x=PSWQ, y=Scored))
+g +  geom_point()  +
+  geom_point(aes(x=PSWQ, y= pred), color="red") 
+# Look at the distribution of the model residuals
+ggplot(fit.PSWQ, aes(x=.resid)) + geom_histogram(binwidth=.2)
+# Investigate goodness-of-fit of model using only PSQW
+logisticPseudoR2s(fit.PSWQ)
+
+# Ex of other models that would take time to investigate
+fit.part<- glm(Scored ~ PSWQ + Previous + Anxious:PSWQ + Anxious:Previous, family=binomial(link="logit"), data=penalties)
+summary(fit.part) #AIC: 57.797 
+# all estimated coef are likely to have this fit by chance
+
+# Use built-in step fucntion (with caution) to select variables 
+#  to try differenct models and minimize AIC:
+fit.null <- glm(Scored ~ 1, family=binomial(link="logit"), data=penalties)
+summary(fit.null) #AIC:
+
+fit.full <- glm(Scored ~ Previous*Anxious*PSWQ, family=binomial(link="logit"), data=penalties)  
+summary(fit.full) #AIC: 58.392 
+# all estimated coef are likely to have this fit by chance
+
+# Caution in using the step function to automate the selection of variables
+# Is known to sometimes miss the best model
+fit.step <- step(fit.null, 
+                 scope=list(lower=fit.null, upper=fit.full), direction=  "both")
+# best fit: Scored ~ PSWQ + Previous + PSWQ:Previous  AIC=54.25
+
+fit_found <- glm(Scored ~ PSWQ*Previous,family=binomial(link="logit"), data=penalties)
+summary(fit_found)
+# log (p(Scored)/p(Missed) ) = -0.584338 PSWQ, other coeficients insignificant
+
+
+
+
+
+# From above:
+# fit.minus.anxious <- glm(Scored ~ . -Anxious, family=binomial(link="logit"), data=penalties)
+# log (p(Scored)/p(Missed) ) = -0.23009  PSWQ + 0.06480 Previous 
+
+# Investigate goodness-of-fit
+logisticPseudoR2s(fit.minus.anxious)
+
+
+# Use the model to estimate the probability of scoring if 
+# both PSWQ and Previous are their mean values
+newdf = data.frame( PSWQ=mean(penalties$PSWQ), Previous=mean(penalties$Previous), Anxious=mean(penalties$Anxious))
+predict(fit.minus.anxious, newdf, type="response") 
+
+
+library (stats)
+# fit.minus.anxious improvement over null   *****************************
+modelChi <- fit.minus.anxious$null.deviance - fit.minus.anxious$deviance
+chidf <- fit.minus.anxious$df.null - fit.minus.anxious$df.residual
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+modelChi; chidf; chisq.prob
+
+
+#############################################################
+##Assign 9 diabetes###
+setwd("/Users/Pat/Documents/R/HS_616/assign")
+
+library (ggplot2)
+#install.packages("foreign")
+library(foreign)
+library (stats)
+
+
+logisticPseudoR2s <- function(LogModel) {
+  dev <- LogModel$deviance 
+  nullDev <- LogModel$null.deviance 
+  modelN <-  length(LogModel$fitted.values)
+  R.l <-  1 -  dev / nullDev
+  R.cs <- 1- exp ( -(nullDev - dev) / modelN)
+  R.n <- R.cs / ( 1 - ( exp (-(nullDev / modelN))))
+  cat("Pseudo R^2 for logistic regression\n")
+  cat("Hosmer and Lemeshow R^2  ", round(R.l, 3), "\n")
+  cat("Cox and Snell R^2        ", round(R.cs, 3), "\n")
+  cat("Nagelkerke R^2           ", round(R.n, 3),    "\n")
+}
+
+
+diab <- read.arff("http://www.cs.usfca.edu/~pfrancislyon/uci-diabetes.arff")
+summary(diab)
+
+# 1. Number of times pregnant
+# 2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test
+# 3. Diastolic blood pressure (mm Hg)
+# 4. Triceps skin fold thickness (mm)
+# 5. 2-Hour serum insulin (mu U/ml)
+# 6. Body mass index (weight in kg/(height in m)^2)
+# 7. Diabetes pedigree function
+# 8. Age (years)
+# 9. Class variable (tested negative or tested positive)
+
+#1
+# Correct zeros that should be NA
+# Note that zero pregnancies is valid, but the following are not
+diab$plas <- ifelse(diab$plas==0,NA, diab$plas)
+diab$pres <- ifelse(diab$pres==0,NA, diab$pres)
+diab$skin <- ifelse(diab$skin==0,NA, diab$skin)
+diab$insu <- ifelse(diab$insu==0,NA, diab$insu)
+diab$mass <- ifelse(diab$mass==0,NA, diab$mass)
+summary(diab)
+
+
+#2 t-tests
+
+
+
+#3 density distributions of each variable with fill color determined by diabetes status
+g <- ggplot(data=diab)
+g + geom_histogram(aes(x=preg),binwidth=1, color = 5)  
+
+g + geom_histogram(aes(x=preg, fill=class),binwidth=1,position="dodge")  # position="identity" for overlaid
+g + geom_histogram(aes(x=plas, fill=class), binwidth=1,position="dodge")
+g + geom_histogram(aes(x=pres, fill=class), binwidth=1,position="dodge")
+
+g + geom_histogram(aes(x=skin, fill=class), binwidth=1,position="dodge")
+g + geom_histogram(aes(x=insu, fill=class), binwidth=1,position="dodge")
+g + geom_histogram(aes(x=mass, fill=class), binwidth=1,position="dodge")
+
+g + geom_density(aes(x=preg, fill=class), alpha=.5)    
+g + geom_density(aes(x=plas, fill=class), alpha=.5)   
+g + geom_density(aes(x=pres, fill=class), alpha=.5)    
+g + geom_density(aes(x=skin, fill=class), alpha=.5)    
+g + geom_density(aes(x=insu, fill=class), alpha=.5)   
+g + geom_density(aes(x=mass, fill=class), alpha=.5)    
+g + geom_density(aes(x=pedi, fill=class), alpha=.5)   
+g + geom_density(aes(x=age, fill=class), alpha=.5)    
+
+#4 correlations
+
+
+#5 Fit a regression model of diabetes as a function of the other variables.
+fit_all <- glm(class ~ ., family = binomial(), data = diab)
+summary(fit_all) #AIC: 362.02, Nagelkerke R^2 0.452
+# Null deviance: 498.10  on 391  degrees of freedom 
+# Residual deviance: 344.02  on 383  degrees of freedom
+logisticPseudoR2s(fit_all) 
+
+fit_b<- glm(class ~ preg+ plas + mass + pedi, family = binomial(), data = diab)
+summary(fit_b) #AIC: 714.72, Nagelkerke R^2 0.415
+# Null deviance: 974.75  on 751  degrees of freedom   
+# Residual deviance: 704.72  on 747  degrees of freedom  
+logisticPseudoR2s(fit_b) 
+
+fit_c <- glm(class ~ plas + mass + pedi, family = binomial(), data = diab)
+summary(fit_c ) #AIC: 737.76,  Nagelkerke R^2  0.383 
+# Null deviance: 974.75  on 751  degrees of freedom
+# Residual deviance: 729.76  on 748  degrees of freedom
+logisticPseudoR2s(fit_c ) 
+
+
+
+#Extra: replace  NAs with either medians or means
+diab2 <- diab
+diab2$plas[is.na(diab2$plas)] <- mean(diab2$plas,na.rm=T)
+diab2$pres[is.na(diab2$pres)] <- mean(diab2$pres,na.rm=T)
+diab2$skin[is.na(diab2$skin)] <- mean(diab2$skin,na.rm=T)
+diab2$insu[is.na(diab2$insu)] <- mean(diab2$insu,na.rm=T)
+diab2$mass[is.na(diab2$mass)] <- mean(diab2$mass,na.rm=T)
+summary(diab2)
+
+
+# NB: with imputed data, null DF and null deviances are same
+#  for all models since they use the same observations
+fit_all2 <- glm(class ~ ., family = binomial(), data = diab2)
+summary(fit_all2) #AIC: 731.3, Nagelkerke R^2 0.421 
+# Null deviance: 993.48  on 767  degrees of freedom
+# Residual deviance: 713.30  on 759  degrees of freedom
+logisticPseudoR2s(fit_all2)
+
+fit_b2<- glm(class ~ preg+ plas + mass + pedi, family = binomial(), data = diab2)
+summary(fit_b2) #AIC: 726.18, Nagelkerke R^2 0.418   ***slightly lower AICs, pseudo R^2s
+# Null deviance: 993.48  on 767  degrees of freedom  
+# Residual deviance: 716.18  on 763  degrees of freedom  
+logisticPseudoR2s(fit_b2)
+
+
+# test fit_all improvement over null model  *****************************
+modelChi <- fit_all2$null.deviance - fit_all2$deviance
+chidf <- fit_all2$df.null - fit_all2$df.residual
+# pchisq is cumulative distribution function for the chi-squared 
+#  (chi^2) distribution with chidf degrees of freedom for
+#   quantile = modelChi = null deviance - model deviance
+# So (1 - pchisq) is the prob of a test stastistic this good or better by chance
+chisq.prob <- 1 - pchisq(modelChi, chidf)
+modelChi; chidf; chisq.prob # chisq.prob = 0
+# indicates improved fit in this model over intercept only (null model) is significant
+
+# test fit_all improvement over fit_b2 model  *****************************
+modelChi2 <- fit_b2$deviance - fit_all2$deviance
+chidf2 <- fit_b2$df.residual - fit_all2$df.residual
+chisq.prob2 <- 1 - pchisq(modelChi, chidf)
+modelChi2; chidf2; chisq.prob2 # chisq.prob = 0.5781859
+# indicates improved fit of model fit_all over fit_b2 is insignificant
+
+anova(fit_b2,fit_all2, test="Chisq") # p-value = 0.5782 (as above)
+
+
+
+fit_null2 <- glm(class~1,family = binomial(), data = diab2)
+summary(fit_null)  # AIC=995.48
+
+# cross validation
+#install.packages("boot")
+library(boot)
+cv0 <- cv.glm(diab2, fit_null2, K=5)
+cv1 <- cv.glm(diab2, fit_b2, K=5)
+cv2 <- cv.glm(diab2, fit_all2, K=5)
+cv0$delta # raw error, adjusted error (for not using leave-one-out)
+cv1$delta 
+cv2$delta
+
+
+fit_c2 <- glm(class ~ plas + mass + pedi, family = binomial(), data = diab2)
+summary(fit_c2 ) #AIC: 752.39,  Nagelkerke R^2  0.382 
+# Null deviance: 993.48  on 767  degrees of freedom
+# Residual deviance: 744.39  on 764  degrees of freedom
+logisticPseudoR2s(fit_c2 ) 
+
+
+fit_null <- glm(class~1,family = binomial(), data = diab2)
+summary(fit_null)  # AIC=995.48
+
+fit_full <- glm(class ~ preg*plas* pres*skin*insu*mass*pedi*age, family = binomial(), data = diab2)
+summary(fit_full) # AIC=9739.2  Nagelkerke R^2 -62412.69
+# Null deviance:  993.48  on 767  degrees of freedom
+# Residual deviance: 9227.18  on 512  degrees of freedom
+logisticPseudoR2s(fit_full) 
+
+
+# Caution in using the step function to automate the selection of variables
+# Is known to sometimes miss the best model
+fit.step <- step(fit_null, 
+                 scope=list(lower=fit_null, upper=fit_full), direction=  "both")
+# best fit: class ~ plas + mass + preg + pedi + plas:pedi + plas:preg
+fit_found <- glm(class ~ plas + mass + preg + pedi + plas:pedi + plas:preg, family = binomial(), data = diab2)
+summary(fit_found)#AIC: 719.26, Nagelkerke R^2 0.431
+# Null deviance: 993.48  on 767  degrees of freedom
+# Residual deviance: 705.26  on 761  degrees of freedom  
+logisticPseudoR2s(fit_found)
+anova(fit_found,fit_all2, test="Chisq") # p-value = 0.5782 (as below)
+
+confint(fit_found) # 95% CI for the coefficients
+exp(coef(fit_found)) # exponentiated coefficients
+exp(confint(fit_found)) # 95% CI for exponentiated coefficients
+
+
+
+
+
+# linear regression models
+diab$class <- ifelse(diab$class=="tested_positive",1, 0)
+
+# mass as a function of other variables
+fit_lm_mass <- lm(mass ~ pres+skin+age + class,  data = diab2)
+summary(fit_lm_mass) # Adjusted R-squared:   0.37493 
+plot(fit_lm_mass)
+
+fit_lm_mass_null <- lm(mass ~ 1,  data = diab2)
+fit_lm_mass_fullish <- lm(mass ~ pres*skin*age* class,  data = diab2)
+
+fit.step3 <- step(fit_lm_mass_null, 
+                  scope=list(lower=fit_lm_mass_null, upper=fit_lm_mass_fullish), direction=  "both")
+fit_mass_find <- lm(mass ~ skin + class + pres + age + skin:age + skin:pres, data = diab2)
+summary(fit_mass_find) # Adjusted R-squared:  0.3912 
+plot(fit_mass_find)
+
+
+
+
+
+
+#6 regression model with diastolic blood pressure as a function of two to four of the other variables
+fit_lm_all <- lm(pres ~ .,  data = diab2)# plas, mass, age signif, pedi borderline
+summary(fit_lm_all) # Adjusted R-squared:  0.1853 
+plot(fit_lm_all)
+
+fit_lm_part <- lm(pres ~ age*plas*skin*mass*pedi,  data = diab2)
+summary(fit_lm_part) # Adjusted R-squared:  0.1855 
+
+fit_lm_null <- lm(pres ~ 1,  data = diab2)
+summary(fit_lm_part) # Adjusted R-squared:  0.1855 
+
+fit_lm_full <- lm(pres ~ age*plas*skin*mass*pedi * preg*insu* class,  data = diab2)
+summary(fit_lm_full) # Adjusted R-squared:  0.2237, all coef NOT significant
+
+fit.step2 <- step(fit_lm_null, 
+                  scope=list(lower=fit_lm_null, upper=fit_lm_full), direction=  "both")
+# best fit: pres ~ age + mass + plas + pedi + insu + age:mass + mass:insu + plas:insu
+# AIC = 3669.7
+fit_lm_best <- lm(pres ~ age + mass + plas + pedi + insu + age:mass + mass:insu + plas:insu,  data = diab2)
+summary(fit_lm_best) # Adjusted R-squared:  Adjusted R-squared:  0.1969 
+# signif coef are: plas, mass:insu , plas:insu
+
+fit_lm_best_sig <- lm(pres ~ plas + mass:insu + plas:insu,  data = diab2)
+summary(fit_lm_best_sig)# Adjusted R-squared:  0.1117 <- not best
+plot(fit_lm_best_sig)
+
+
+
+#################################################################
+##10_1 ######
+setwd("/Users/Pat/Documents/R/HS_616/lecture_scripts")
+
+temper <- read.csv("weather.data.csv")
+plot(temper$month,temper$upper)
+plot(temper$yr,temper$upper)
+
+fit_month <- lm(temper$upper~ temper$month)
+summary(fit_month)
+plot(fit_month)
+
+temper2 <- temper   ##################
+
+
+plot(temper2$month,temper2$upper)
+plot(temper2$yr,temper2$upper)
+
+fit_month <- lm(temper2$upper~ temper2$month)
+summary(fit_month)
+plot(fit_month)
+
+fit_month_1 <- lm(temper2$upper~ temper2$month -1)
+summary(fit_month_1)
+plot(fit_month_1)
+
+fit_month_yr<- lm(temper2$upper~ temper2$month + temper2$yr)
+summary(fit_month_yr)
+
+
+
+
+
+
+
+
+
+
+
