@@ -1268,6 +1268,7 @@ setwd("C:/Users/ho200/Downloads")
 library (ppcor)
 library(ggplot2)
 library(reshape2)
+library(dplyr)
 
 
 logisticPseudoR2s <- function(LogModel) {
@@ -1326,7 +1327,7 @@ cor(penalties[-4])
 pcor(penalties[-4])     
 # accounts for the effect of controlled-for variables on both of the compared vars   
 pcor(penalties)  
-penalties = mutate(penalties, Scored = ifelse(quiz8_dat$Scored=="Scored ",1,0))
+penalties = mutate(penalties, Scored = ifelse(penalties$Scored=="Scored ",1,0))
 
 #cor and pcor require that dichotomous variables be coded as 0,1
 cor.test(penalties$Scored, penalties$Previous) 
