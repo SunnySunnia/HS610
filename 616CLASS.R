@@ -1569,7 +1569,7 @@ modelChi; chidf; chisq.prob # chisq.prob = 0
 # test fit_all improvement over fit_b2 model  *****************************
 modelChi2 <- fit_b2$deviance - fit_all2$deviance
 chidf2 <- fit_b2$df.residual - fit_all2$df.residual
-chisq.prob2 <- 1 - pchisq(modelChi, chidf)
+chisq.prob2 <- 1 - pchisq(modelChi2, chidf2)
 modelChi2; chidf2; chisq.prob2 # chisq.prob = 0.5781859
 # indicates improved fit of model fit_all over fit_b2 is insignificant
 
@@ -1577,7 +1577,7 @@ anova(fit_b2,fit_all2, test="Chisq") # p-value = 0.5782 (as above)
 
 
 
-fit_null2 <- glm(class~1,family = binomial(), data = diab2)
+fit_null <- glm(class~1,family = binomial(), data = diab2)
 summary(fit_null)  # AIC=995.48
 
 # cross validation
