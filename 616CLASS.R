@@ -1737,6 +1737,7 @@ dbListFields(con, 'refGene')
 # Alternatively, if you want all the results (and they'll fit in memory) use dbGetQuery
 #  which sends, fetches and clears for you.
 resultSet <- dbSendQuery(con, 'SELECT * FROM refGene')
+#res = dbSendQuery(con, 'SELECT name chrom strand FROM refGene WHERE ....')
 
 # Fetch records from a previously executed query
 #  and save as a data frame object. 
