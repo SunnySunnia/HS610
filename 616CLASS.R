@@ -1709,6 +1709,71 @@ fit_month_yr<- lm(temper2$upper~ temper2$month + temper2$yr)
 summary(fit_month_yr)
 
 
+#####################################################################
+#####10_2##
+
+# set the working directory
+setwd("C:/HS616")
+
+# There is a MySQL database for public access at genome-mysql.cse.ucsc.edu.
+# This server allows MySQL access to the same set of data currently available on the public UCSC Genome Browser site
+
+###install.packages("RMySQL")  # Run the first time
+###install.packages("sqldf")
+library(RMySQL) # Database Interface and 'MySQL' Driver for R
+library(sqldf)  # Perform SQL selects on R data frames
+
+# Adapted from: http://playingwithr.blogspot.com/2011/05/accessing-mysql-through-r.html
+#Establish a connection to the UCSC genone browser
+con = dbConnect(MySQL(), user='genome', dbname='hg19', host='genome-mysql.cse.ucsc.edu')
+# Return a list of the tables in our connection
+dbListTables(con)
+# Return a list of the fields in a specific table
+dbListFields(con, 'knownGene')
+dbListFields(con, 'refGene')
+
+#Run a query
+# To retrieve results a chunk at a time, use dbSendQuery, dbFetch, then dbClearResult
+# Alternatively, if you want all the results (and they'll fit in memory) use dbGetQuery
+#  which sends, fetches and clears for you.
+resultSet <- dbSendQuery(con, 'SELECT * FROM refGene')
+
+# Fetch records from a previously executed query
+#  and save as a data frame object. 
+#  n specifies the number of records to retrieve, n=-1 retrieves all pending records
+hg19_refgene = dbFetch(resultSet,n=-1, stringsAsFactors=F)
+str(hg19_refgene)
+head(hg19_refgene)
+
+# hg19_refgeneF = dbFetch(resultSet,n=-1, stringsAsFactors=T)
+# str(hg19_refgeneF)
+# head(hg19_refgeneF)
+
+
+# A data frame is used for storing data tables. It is a list of vectors of equal length
+# You can think of the vectors as columns in a database or excel spreadsheet
+typeof(hg19_refgene)
+colnames(hg19_refgene)
+dbClearResult(resultSet)
+
+# Disconnect when done with the mysql database
+dbDisconnect(con)
+
+
+# Add a new column to hold transcription start site (tss) relative to the strand
+#  on the + strand, this is the left end of the range (txStart), on the - strand it is the right end (txEnd)
+hg19_refgene$tss <- ifelse(hg19_refgene$strand == '+', hg19_refgene$txStart, hg19_refgene$txEnd)
+
+write.table(hg19_refgene, file = "hg19_refgene2.txt", append = FALSE, quote = FALSE, sep = "\t",
+            eol = "\n", na = "NA", dec = ".", row.names = TRUE,
+            col.names = TRUE, qmethod = c("escape", "double"),
+            fileEncoding = "")
+
+# Create a subset of the data
+hg19 <- hg19_refgene[, c("name", "chrom", "strand", "tss")]
+summary(hg19)
+
+
 
 
 
