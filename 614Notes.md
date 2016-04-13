@@ -79,7 +79,21 @@ http://www.merckmanuals.com/professional/nutritional-disorders/nutritional-suppo
 - Multiclass confusion matrix: for each true category, what's the number of times that it has been predicted to be p1, p2, ...  
 - -> p1, p2, ... = predicted categories.  
 - ROC/AUC  
+- sensitivity or true positive rate (TPR) eqv.recall  
+	`TPR = TP/P = TP/(TP+FN)`
+- specificity (SPC) or true negative rate  
+	`SPC = TN/N = TN/(TN+FP)`   
+- precision or positive predictive value (PPV)  
+	`PPV = TP/(TP+FP)`  
+```
+PPV(TP+FP) = TP  
+PPV*TP +PPV*FP = TP  
+PPV*FP = TP - PPV*TP  
+PPV*FP = TP (1-PPV) 
+```
 
+- accuracy (ACC)  
+	ACC = (TP + TN) / (TP + FP + FN + TN)  
 
 **Sensitivity, specificity, precision, etc:**  
 - Test 99% sensitivity: given someone has the disease, there is 99% of time that the condition will catch that disease:  
