@@ -1775,6 +1775,303 @@ hg19 <- hg19_refgene[, c("name", "chrom", "strand", "tss")]
 summary(hg19)
 
 
+################################################################
+#####Assign_10###
+setwd( "C:/Users/vhasfczengs/Downloads")
+library(ggplot2)
+
+#1 
+temper <- read.csv("weather.data.csv")
+plot(temper$month,temper$upper)
+plot(temper$yr,temper$upper)
+
+#2
+fit_month0 <- lm(temper$upper~ temper$month)
+summary(fit_month0)
+##We are predicting average high temperature of the month.
+##temper$upper_hat = 0.32559 * temper$month +12.82991.
+##According to predicting formula, January will have the lowest predicted temperature, 
+###December will have the highest.
+
+#3
+plot(fit_month0,1)
+##There are 12 different output values predicted by the model, they represent the predicted 
+##values for each month (12 input values).
+table(temper$month)
+##There are about 500 different values in the x-axis, they represent the difference of each high
+##temperature in a month comparing to the predicted value of each month.
+
+#4
+summary(fit_month0$residuals)
+##the range of the values on the y-axis = (-19.96, 21.37)
+##A negative y value signifies the actual temperature is less than the predicted value.
+##A positive y value signifies the actual temperature is greater than the predicted value.
+
+#5
+##There is a downward concaved parabolic pattern in the plot which indicated there is variation 
+##in the data that is not explained by the model. The parabolic pattern indicated that the model
+##over-estimated (negative residuals) the temperatures in the cold months 
+##(Jan, Feb, March, Oct, Nov, and Dec) but under-estimated (positive residuals) the 
+##temperatures in the warm months (Apr-Sept).
+
+#6
+summary(fit_month0)
+##Even though the coefficient is significant, the r-squared is 0.03 which is very low,
+##indicating that the model only explains very little variation of the data.
+##So the model is not a good fit to the data.
+
+#7
+temper2 <- temper   ##################
+## fill in your code here to correct the problem with this dataset
+temper2$month = factor(temper2$month, ordered = F)
+
+plot(temper2$month,temper2$upper)
+plot(temper2$yr,temper2$upper)
+
+#8
+fit_month <- lm(temper2$upper~ temper2$month)
+summary(fit_month)
+plot(fit_month, 1)
+##there are 11 predictor variables.
+##predicted line equation:
+##temper$upper_hat = temper2$month2*0.74112 + temper2$month3*3.2705 + temper2$month4*5.8837
+##                  + temper2$month5*9.9508 + temper2$month6*12.3404 + temper2$month7*14.7438
+##                  + temper2$month8*15.1749 + temper2$month9*11.4142 + temper2$month10*7.1959
+##                  + temper2$month11*2.7907 + temper2$month12*0.3698 + 7.9301
+###This prediction equation is more comprehensive than the last one as it predicts the temperature
+###with respect to the month.
+
+#9
+###This model fits much better that the last in terms of no patterns in residual-fitted plot and 
+### a much higher r-squared, 0.70.
+
+#10
+fit_month_1 <- lm(temper2$upper~ temper2$month -1)
+summary(fit_month_1)
+plot(fit_month,1)
+plot(fit_month_1,1)
+##From the two residual-fitted plots, the residuals are the same for the two models.
+fit_month$coefficients
+fit_month_1$coefficients
+##The coefficients of the two models are different with respect each month, but the differences 
+##are approximately the intercept of the fit_month.
+summary(fit_month)$sigma
+summary(fit_month_1)$sigma
+###The residual standard errors are the same to both of the model.
+
+#11
+summary(fit_month)
+summary(fit_month_1)
+#There are 11 coefficients in fit_month and 12 in fit_month_1 but no intercept.
+##There are 12 variables for both models.
+###The intecept in fit_month and the first coefficient temper2$month1 in fit_month_1 have same
+###same Estimate, Std. Error, tvalue, and Pr(>|t|).
+###So the the intercept of fit_month is the contribution of the estimation to the first month.
+###In other words, the intercept in fit_month is the first predictor in fit_month_1 which also 
+###predicts for the first month.
+
+#12 
+fit_month$coefficients[6]+fit_month$coefficients[1]
+fit_month_1$coefficients[6]
+##The sum of the two coefficients for fit_month: temper2$month6 (ie: 12.3404) and the 
+##intercept (ie: 7.930) approximately equals the coefficient for fit_month_1 temper2$month6 
+##(ie: 20.2705).
+
+
+fit_month_yr<- lm(temper2$upper~ temper2$month + temper2$yr)
+summary(fit_month_yr)
+plot(fit_month_yr,1)
+
+fit_month_yr_1<- lm(temper2$upper~ temper2$month + temper2$yr -1)
+summary(fit_month_yr_1)
+plot(fit_month_yr_1,1)
+
+#13
+##fit_month represents the effect on response variable resulting from unit changes
+##in predictor variables from the fitted value for January (b0=value for January).
+
+##fit_month_1 represents the effect on response variable resulting from unit changes
+##in predictor variables from the origin (b0=0).
+
+#14
+summary(fit_month)$adj.r.squared
+summary(fit_month_1)$adj.r.squared
+##From Residuals and Residual standard error, the two models are really similar.
+##However, their r-squared's 0.7084385 and 0.9547667, respectively, do not agree with Residuals 
+##and Residual standard error.
+##Removing intercept term did increase r-squared in a large amount even without any inprovement
+##in residuals.
+
+#15
+par(mfrow=c(1,2))
+plot(fit_month0,1)
+plot(fit_month,1)
+summary(fit_month0$residuals)
+summary(fit_month$residuals)
+##The residual ranges are (-19.96, 21.37) and (-20.27, 13.70), respectively.
+##Because fit_month has considered each month separately, for point 6067 from the month of August,
+##the fitted value for this point had been increased which resulted in its displacement along the x-axis.
+
+#16
+temper2$yr = factor(temper2$yr, ordered = F)
+fit_month_yr<- lm(temper2$upper~ temper2$month + temper2$yr)
+summary(fit_month_yr)
+plot(fit_month_yr,1)
+##There are 29 predictor variables(intercept not included).
+##This model predicts the high temperature with respect to each month and each year.
+
+#17
+fit_month_yr_1<- lm(temper2$upper~ temper2$month + temper2$yr -1)
+summary(fit_month_yr_1)
+plot(fit_month_yr_1,1)
+fit_month_yr$coefficients[6]+fit_month_yr$coefficients[1]
+fit_month_yr_1$coefficients[6]
+##The sum of the two coefficients for fit_month_yr: temper2$month6 (ie: 12.34087) and the 
+##intercept (ie: 6.242108  ) approximately equals the coefficient for fit_month_1 temper2$month6 
+##(ie: 18.58298 ).
+##The base month is month1(or January). The value for any of the other months is the effect
+##on the response variable resulting from a unit change in that predictor relative to the 
+##value for the base month with all other predictor variables held constant.
+##1987 is missing from both of the models.
+##intercept of fit_month_yr is comprised by values for January and year1987.
+
+
+# fill in your exploratory code here
+#18
+ggplot(temper2,aes(x = upper, fill = month)) +  geom_density(alpha=.4) +
+  ggtitle("Density plots of high temperature of each month")
+
+ggplot(temper2,aes(x = lower, fill = month)) +  geom_density(alpha=.4) +
+  ggtitle("Density plots of low temperature of each month")
+
+ggplot(temper2,aes(x = rain, fill = month)) +  geom_density(alpha=.4) +
+  ggtitle("Density plots of meansures of rain of each month")
+##Most of the density plots for high and low temperatures are not normal (bimodal or skewed).
+##Some months have a more notable difference (a horizontal shift) in temperatures than other months.
+##For the measure of rainfall, most of the data points are 0 for all months. And its range is 
+###very wide.They behave like poisson distributions.
+
+#19
+ggplot(temper2,aes(x = upper, fill = yr)) +  geom_density(alpha=.4) +
+  ggtitle("Density plots of high temperature of each year")
+
+ggplot(temper2,aes(x = lower, fill = yr)) +  geom_density(alpha=.4) +
+  ggtitle("Density plots of low temperature of each year")
+
+ggplot(temper2,aes(x = rain, fill = yr)) +  geom_density(alpha=.4) +
+  ggtitle("Density plots of meansures of rain of each year")
+##Similar to plots by months, most of the density plots for high and low temperatures are 
+##not normal (bimodal or skewed).
+##But density plots by years did not show notable differences in temperatures across the years.
+##For the measure of rainfall, most of the data points are 0 for all months. And its range is 
+###very wide. They behave as poisson distributions except the density curves are not very smooth.
+
+#20
+ggplot(temper2,aes(x=month, y=rain, col=month))+geom_point()+
+  ggtitle("Rainfall distribution over the months")
+##From the data over the years, the heak rainfall is on average during the months of October. 
+##The low rainfall of the year is on average during Febuary. 
+
+
+
+
+###############################################################
+####11_1#####
+#Practical session: Introduction to SVM in R
+#Jean-Philippe Vert
+#https://escience.rpi.edu/data/DA/svmbasic_notes.pdf
+
+#install.packages("kernlab")
+#install.packages("ROCR")
+
+n <- 150 # number of data points
+p <- 2 # dimension
+
+sigma <- 1 # variance of the distribution
+meanpos <- 0 # centre of the distribution of positive examples
+meanneg <- 3 # centre of the distribution of negative examples
+npos <- round(n/2) # number of positive examples
+nneg <- n-npos # number of negative examples
+
+# Generate the positive and negative examples
+xpos <- matrix(rnorm(npos*p,mean=meanpos,sd=sigma),npos,p)
+xneg <- matrix(rnorm(nneg*p,mean=meanneg,sd=sigma),npos,p)
+x <- rbind(xpos,xneg)
+
+# Generate the labels
+y <- matrix(c(rep(1,npos),rep(-1,nneg)))
+
+# Visualize the data
+plot(x,col=ifelse(y>0,1,2))
+legend("topleft",c('Positive','Negative'),col=seq(2),pch=1,text.col=seq(2))
+
+#Now we split the data into a training set (80%) and a test set (20%):
+## Prepare a training and a test set ##
+ntrain <- round(n*0.8) # number of training examples
+tindex <- sample(n,ntrain) # indices of training samples
+xtrain <- x[tindex,]
+xtest <- x[-tindex,]
+ytrain <- y[tindex]
+ytest <- y[-tindex]
+istrain=rep(0,n)
+istrain[tindex]=1
+
+# Visualize
+plot(x,col=ifelse(y>0,1,2),pch=ifelse(istrain==1,1,2))
+legend("topleft",c('Positive Train','Positive Test','Negative Train','Negative Test'),
+       col=c(1,1,2,2),pch=c(1,2,1,2),text.col=c(1,1,2,2))
+
+# load the kernlab package
+library(kernlab)
+
+# train the SVM
+svp <- ksvm(xtrain,ytrain,type="C-svc",kernel='vanilladot',C=100,scaled=c())
+
+# General summary
+svp
+
+# Attributes that you can access
+attributes(svp)
+# For example, the support vectors
+alpha(svp) # alpha vector (possibly scaled)
+# indices of support vectors in data matrix
+#  after the possible effect of na.omit and subset
+alphaindex(svp)
+coef(svp) #The corresponding coefficients times the training labels
+# Use the built-in function to pretty-plot the classifier
+plot(svp,data=xtrain)
+#              plot(scale(x), col=y+2, pch=y+2, xlab="", ylab="")
+w <- colSums(coef(svp)[[1]] * x[unlist(alphaindex(svp)),])
+b <- b(svp)
+
+# Predict labels on test
+ypred = predict(svp,xtest)
+table(ytest,ypred)
+# Compute accuracy
+sum(ypred==ytest)/length(ytest)
+# Compute at the prediction scores
+ypredscore = predict(svp,xtest,type="decision")
+
+# in SVM, you get more and more detail in gamma and C gets bigger 
+## risk of over-fitting  
+
+
+
+
+
+
+prevalence=0.5
+sensitivity=2/3
+specificity = 2/3
+recp_specificity=1-specificity
+recp_prevalence=1-prevalence
+prob_cond_disease=(sensitivity*prevalence)/((sensitivity*prevalence)+(recp_specificity)*(recp_prevalence) )
+prevalence
+sensitivity
+recp_specificity
+recp_prevalence
+paste(sensitivity,'*',prevalence,'/((',sensitivity,'*',prevalence,')+(',recp_specificity,')*(',recp_prevalence,') )')
+prob_cond_disease
 
 
 
