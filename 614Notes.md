@@ -79,6 +79,10 @@ http://www.merckmanuals.com/professional/nutritional-disorders/nutritional-suppo
 - Multiclass confusion matrix: for each true category, what's the number of times that it has been predicted to be p1, p2, ...  
 - -> p1, p2, ... = predicted categories.  
 - ROC/AUC  
+	ROC curve:
+	for each cut point: 1, 0.9, 0.8, 0.7, 0.6, 0.5, .....  
+	compute the TP-rate and FP-rate pair,  
+	plot the TPR-FPR pairs.  
 - sensitivity or true positive rate (TPR) eqv.recall  
 	`TPR = TP/P = TP/(TP+FN)`
 - specificity (SPC) or true negative rate  
