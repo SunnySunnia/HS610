@@ -117,4 +117,28 @@ pool_variance=((sum(face$age=="Young")-1)*var(subset(face$rating,face$age=="Youn
 sqrt(pool_variance*((1/sum(face$age=="Young"))+(1/sum(face$age=="Old"))))
 t.test(subset(face$rating,face$age=="Young"),subset(face$rating,face$age=="Old"))
 
+###############################################
+##Quiz 2##
+setwd("C:/PSYD755")
+library(ggplot2)
+Supermodel <- read.delim("C:/Users/ho200/Downloads/Supermodel.dat.txt", stringsAsFactors=FALSE)
+pubs <- read.delim("C:/Users/ho200/Downloads/pubs.dat.txt", stringsAsFactors=FALSE)
+fit_pubs = lm(mortality~pubs, data = pubs)
+summary(fit_pubs)
+g = ggplot(data = pubs, aes(x=pubs, y=mortality))+ggtitle("Mortality~pubs")
+g+geom_point()+geom_smooth(method = "lm", se=F)
+ggsave("mort_pub_reg.jpg")
+ 
+fit_model_all= lm(salary~ ., data = Supermodel)
+summary(fit_model_all)
+fit_model_nobeauty = lm (salary~ age+years, data = Supermodel)
+summary(fit_model_nobeauty)
+fit_model_beauty = lm(salary~beauty, data = Supermodel)
+summary(fit_model_beauty)
+fit_model_age = lm(salary~age, data = Supermodel)
+summary(fit_model_age)
+fit_model_year = lm(salary~years, data = Supermodel) 
+summary(fit_model_year)
 
+
+##R-squred = sqrt(t^2/t^2+df) from t-test
