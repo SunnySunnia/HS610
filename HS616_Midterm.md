@@ -34,25 +34,28 @@ Data Reshaping with melt: (look at assignments)
    
 **Distributions:**  
      uniform  
-        dunif(x, min = 0, max = 1, log = FALSE)  
-        punif(q, min = 0, max = 1, lower.tail = TRUE, log.p = FALSE)  
-        qunif(p, min = 0, max = 1, lower.tail = TRUE, log.p = FALSE)  
-        runif(n, min = 0, max = 1)  
+        - dunif(x, min = 0, max = 1, log = FALSE)  
+        - punif(q, min = 0, max = 1, lower.tail = TRUE, log.p = FALSE)  
+        - qunif(p, min = 0, max = 1, lower.tail = TRUE, log.p = FALSE)  
+        - runif(n, min = 0, max = 1)  
+        
      normal  
-        dnorm(x, mean = 0, sd = 1, log = FALSE)  
-        pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)  
-        qnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)  
-        rnorm(n, mean = 0, sd = 1)  
+        - dnorm(x, mean = 0, sd = 1, log = FALSE)  
+        - pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)  
+        - qnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)  
+        - rnorm(n, mean = 0, sd = 1)  
+        
      poisson  
-        dpois(x, lambda, log = FALSE)  
-        ppois(q, lambda, lower.tail = TRUE, log.p = FALSE)  
-        qpois(p, lambda, lower.tail = TRUE, log.p = FALSE)  
-        rpois(n, lambda)  
+        - dpois(x, lambda, log = FALSE)  
+        - ppois(q, lambda, lower.tail = TRUE, log.p = FALSE)  
+        - qpois(p, lambda, lower.tail = TRUE, log.p = FALSE)  
+        - rpois(n, lambda)
+        
      bernoulle (sp?)  
-        dbinom(x, size, prob, log = FALSE)  
-        pbinom(q, size, prob, lower.tail = TRUE, log.p = FALSE)  
-        qbinom(p, size, prob, lower.tail = TRUE, log.p = FALSE)  
-        rbinom(n, size, prob)  
+        - dbinom(x, size, prob, log = FALSE)  
+        - pbinom(q, size, prob, lower.tail = TRUE, log.p = FALSE)  
+        - qbinom(p, size, prob, lower.tail = TRUE, log.p = FALSE)  
+        - rbinom(n, size, prob)  
 
 **Basic Statistics:**  
 Variables:  
