@@ -141,4 +141,19 @@ fit_model_year = lm(salary~years, data = Supermodel)
 summary(fit_model_year)
 
 
+######################################################
+###Specificity, sensitivity, etc##
+prevalence=0.5
+sensitivity=2/3
+specificity = 2/3
+recp_specificity=1-specificity
+recp_prevalence=1-prevalence
+prob_cond_disease=(sensitivity*prevalence)/((sensitivity*prevalence)+(recp_specificity)*(recp_prevalence) )
+prevalence
+sensitivity
+recp_specificity
+recp_prevalence
+paste(sensitivity,'*',prevalence,'/((',sensitivity,'*',prevalence,')+(',recp_specificity,')*(',recp_prevalence,') )')
+prob_cond_disease
+
 ##R-squred = sqrt(t^2/t^2+df) from t-test
