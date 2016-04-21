@@ -104,3 +104,6 @@ When is it appropriate to use:
 
 ~~SQL~~  
 
+**Codes**  
+![R codes](R_Cheat_Data.pdf)  
+
