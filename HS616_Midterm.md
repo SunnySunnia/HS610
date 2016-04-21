@@ -33,6 +33,7 @@ Data Reshaping with melt: (look at assignments)
  Simulation - Generating Random Numbers-HD 720p.mov  
    
 **Distributions:**  
+
      uniform  
         - dunif(x, min = 0, max = 1, log = FALSE)  
         - punif(q, min = 0, max = 1, lower.tail = TRUE, log.p = FALSE)  
