@@ -180,6 +180,7 @@ library(ggplot2)
 # brainwt	brain weight in kilograms
 # bodywt	body weight in kilograms
 
+setwd("C:/HS616")
 library(downloader)
 url <- "https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/msleep_ggplot2.csv"
 filename <- "msleep_ggplot2.csv"
@@ -202,7 +203,7 @@ apply(msleep[,6:9],2,mean, na.rm=T)
 
 # More infofrom: Introduction to dplyr
 # https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html
-
+library(dplyr)
 
 #select columns: select name, sleep_total from msleep
 # (return new df that is subset of cols: like select in SQL)
@@ -371,6 +372,7 @@ a<-array(1:9,dim=c(3,3)) #array
 
 lst1 <- list("hello", c(T, F), 1:10) #list
 lapply(lst1, nchar)
+sapply(lst1, nchar)
 lapply(lst1, min)
 sapply(lst1, min)
 
@@ -798,6 +800,11 @@ g+geom_histogram(binwidth=.5, position="identity")
 norm3 = rnorm(100,20,10)
 
 #4a
+df=data.frame(norm1,norm3)
+data4hist2=melt(df)
+g = ggplot(data4hist2,aes(value, fill =variable ))
+g+geom_density()
+
 d1=data.frame(norm1)
 names(d1)="norm"
 d1$index=rep("norm1",1000)
@@ -1392,7 +1399,7 @@ summary(fit.part) #AIC: 57.797
 # Use built-in step fucntion (with caution) to select variables 
 #  to try differenct models and minimize AIC:
 fit.null <- glm(Scored ~ 1, family=binomial(link="logit"), data=penalties)
-summary(fit.null) #AIC:
+summary(fit.null) #AIC:105.64
 
 fit.full <- glm(Scored ~ Previous*Anxious*PSWQ, family=binomial(link="logit"), data=penalties)  
 summary(fit.full) #AIC: 58.392 
@@ -2058,26 +2065,32 @@ ypredscore = predict(svp,xtest,type="decision")
 
 
 
+###########################################################
+####Midterm review##
 
+f <- function(x){       
+  f <- function(x){             
+    x ^ 2       }       
+  f(x) + 1         
+  } 
+f(5)
 
-prevalence=0.5
-sensitivity=2/3
-specificity = 2/3
-recp_specificity=1-specificity
-recp_prevalence=1-prevalence
-prob_cond_disease=(sensitivity*prevalence)/((sensitivity*prevalence)+(recp_specificity)*(recp_prevalence) )
-prevalence
-sensitivity
-recp_specificity
-recp_prevalence
-paste(sensitivity,'*',prevalence,'/((',sensitivity,'*',prevalence,')+(',recp_specificity,')*(',recp_prevalence,') )')
-prob_cond_disease
+v.test <- c(1, 0, NA, 0, 2, 1)
+ifelse(v.test == 0, v.test + 8, "No")
 
+library(ggplot2) 
+library(reshape2)
+randNorm <- rnorm(10000,10,4) 
+randPois <- rpois(10000, 5)
 
+df4plot = data.frame(randNorm,randPois)
+df4plot = melt(df4plot)
+#randNorm = cbind(randNorm, rep("Norm", 10000))
+#randPois = cbind(randPois, rep("Pois", 10000))
+#df4plot=data.frame(rbind(randNorm,randPois))
+#colnames(df4plot)= c("values", "labels") 
 
+g=ggplot(df4plot, aes(x=value, fill=variable)) 
+g+geom_density( position="identity")
 
-
-
-
-
-
+runif(10, 1,10)
