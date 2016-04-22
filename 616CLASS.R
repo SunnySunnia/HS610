@@ -1130,6 +1130,210 @@ g + geom_point() +
 #test whether the variances of two samples are the same.
 var.test()
 
+########################################################
+##Assign 7###
+#setwd("C:/Users/vhasfczengs/Downloads")
+#1
+load("height_weight1.rdata")
+load("height_weight2.rdata")
+load("sampWXXXX.rdata")
+
+#2
+explore=function(vec1, vec2, expected){ 
+  print (paste("length 1:",length(vec1)))
+  print (paste("length 2:",length(vec2)))
+  if(length(vec1)!=length(vec2)) stop("Error: variables have different length!")
+  par(mfrow=c(1,2))
+  hist(vec1,xlim = c(min(vec1,vec2),max(vec1,vec2)))
+  hist(vec2,xlim = c(min(vec1,vec2),max(vec1,vec2)))
+  print(shapiro.test(vec1))
+  print(shapiro.test(vec2))
+  print(paste("variance of vec 1:", var(vec1)))
+  print(paste("variance of vec 2:", var(vec2)))
+  print(paste("Correlation:",cor(vec1,vec2)))
+  print(t.test(vec1,mu=expected))
+  print(t.test(vec2,mu=expected))
+  if(var(vec1)==var(vec2)){
+    print(t.test(vec1,vec2,var.equal=TRUE))
+  }
+  else{
+    print(t.test(vec1,vec2,var.equal=F))
+  }
+} 
+
+#3
+test1=rnorm(100)
+test2=runif(102)
+explore(test1,test2,0)
+
+#4
+explore(sampH2010_1, sampH2010_2,1.76)
+
+#5
+explore(sampH1960_1, sampH1960_2 ,1.76)
+
+#6
+explore(sampH2010_1, sampH1960_1 ,1.76)
+explore(sampH2010_2, sampH1960_2, 1.76)
+##The null hypothesis: The mean height of males in 2010 equals the mean height of those in 1960.
+##Both tests failed to reject the null hypothesis. 
+
+#7
+explore(sampW2010_1, sampW2010_2,88.7)
+
+#8
+explore(sampW1960_1, sampW1960_2 ,88.7)
+
+#9
+explore(sampW2010_1, sampW1960_1,88.7)
+explore(sampW2010_2, sampW1960_2,88.7)
+##The null hypothesis: The mean weight of males in 2010 equals the mean weight of those in 1960.
+##The first test will reject the null hypothesis at a 10% confidence level and the second test will reject at 5% confidence level. 
+##With only 10% and 5% false positive rate respectively, one could believe that males in 2010 are on average heavier than males in 1960.
+
+
+#10
+d1=data.frame(sampH1960_1)
+names(d1)="values"
+d1$index=rep("sampH1960_1",length(sampH1960_1))
+d2=data.frame(sampH1960_2)
+names(d2)="values"
+d2$index=rep("sampH1960_2",length(sampH1960_2))
+d3=data.frame(sampH2010_1)
+names(d3)="values"
+d3$index=rep("sampH2010_1",length(sampH2010_1))
+d4=data.frame(sampH2010_2)
+names(d4)="values"
+d4$index=rep("sampH2010_2",length(sampH2010_2))
+data4hist=data.frame(rbind(d1, d2, d3,d4))
+
+g = ggplot(data4hist,aes(values, fill =index ))
+g+geom_density(alpha=0.4)
+##The modes of the 4 samples are located around the same center.
+##So it is convincing that their means and not significantly different from each.
+
+
+
+#11
+d1=data.frame(sampW1960_1)
+names(d1)="values"
+d1$index=rep("sampW1960_1",length(sampW1960_1))
+d2=data.frame(sampW1960_2)
+names(d2)="values"
+d2$index=rep("sampW1960_2",length(sampW1960_2))
+d3=data.frame(sampW2010_1)
+names(d3)="values"
+d3$index=rep("sampW2010_1",length(sampW2010_1))
+d4=data.frame(sampW2010_2)
+names(d4)="values"
+d4$index=rep("sampW2010_2",length(sampW2010_2))
+data4hist=data.frame(rbind(d1, d2, d3,d4))
+
+g = ggplot(data4hist,aes(values, fill =index ))
+g+geom_density(alpha=0.4)
+##From the density plots, the samples are not normally distrubuted.
+##Their modes are more varient.
+## The density curves of weights of males in 2010 are generally above the ones of 1960 on the right side.
+## That agrees that weights of males in 2010 are averagely greater than in 1960.
+
+#12
+cor(sampWXXXX,sampW1960_1)  #-0.1933038
+cor(sampWXXXX,sampW1960_2)  #0.06146935
+cor(sampWXXXX,sampW2010_1)  #-0.4769623
+cor(sampWXXXX,sampW2010_2)  #1
+fit1 = lm(sampWXXXX~sampW2010_2)
+summary(fit1)
+##As the correlation between sampWXXXX and sampW2010_2 is 1.
+##There will be a very strong linear relationship.
+##the formula for the fitted line: 
+### sampWXXXX_hat = -1.819e-13 + 2.205 * sampW2010_2
+
+#13
+fit2 = lm(sampWXXXX~sampW2010_2+sampH2010_2)
+##The adjusted r-squared is 1.
+##The p-value for sampW2010_2 is <2e-16, it is a significant estimator of sampWXXXX,
+##however, sampH2010_2 is not significant.
+### sampWXXXX_hat = -1.819e-13 + 2.205e+00 * sampW2010_2 -3.463e-15 * sampH2010_2)
+
+#14
+fit3 = lm(sampWXXXX~sampW2010_2*sampH2010_2)
+summary(fit3)
+##sampWXXXX_hat = 5.002e-13+2.205*sampW2010_2-3.959e-13*sampH2010_2+4.657e-15*(sampW2010_2:sampH2010_2)
+
+fit4 = lm(sampWXXXX~sampW2010_2 + sampH2010_2 + sampW2010_2:sampH2010_2)
+##sampWXXXX_hat = 5.002e-13+2.205*sampW2010_2-3.959e-13*sampH2010_2+4.657e-15*(sampW2010_2:sampH2010_2)
+
+#adjusted r-squred @fit1: 1
+#adjusted r-squred @fit2: 1
+#adjusted r-squred @fit3: 1
+#adjusted r-squred @fit4: 1
+##Their adjusted r-squred are the same, so the models are equally good. It is not suprising because the first 
+###model-the single linear regrassion--already has r-squred=1, adding extra 
+###variables will not help too much.
+
+#15
+par(mfrow=c(2,2))
+plot(fit1)
+plot(fit4)
+##fit4 has a slightly more scattered residual-fited plot around 0 and 
+###a slightly more straight pattern on the Q_Q plot than fit1 does.
+
+#16
+permute_w = sample(sampWXXXX, replace=F)
+cor(data.frame(permute_w, sampW1960_1, sampW1960_2, sampW2010_1, sampW2010_2))[1,]
+#  permute_w  sampW1960_1  sampW1960_2  sampW2010_1  sampW2010_2 
+# 1.00000000  0.18378073   0.05092684   -0.47713542  0.26351573 
+fit5 = lm(permute_w~sampW2010_2*sampH2010_2)
+summary(fit5)
+## permute_w_hat = -992.341+13.044*sampW2010_2+648.003*sampH2010_2+(-7.137)*(sampW2010_2*sampH2010_2)
+## adjusted r-squared = 0.02322 
+## This model certainly fits not as good as the previous ones given its low coefficient of determination.
+## Futhermore, none of the variables is a significant predictor to permute_w.
+
+#17
+new_w = 0.4536*sampWXXXX - .3*sampW2010_2*sampH2010_2 + .6*permute_w
+cor(new_w,permute_w) #0.9338298
+## It is a strong correlation because new_w is made with the largest protion from permute_w.
+
+cor(new_w,sampWXXXX) #0.5671837
+## It is a moderately strong correlation, new_w is made partially from sampWXXXX.
+
+cor(new_w,sampW2010_2*sampH2010_2) #0.5200085
+## It is a moderately strong correaltion as new_w is also made from sampW2010_2*sampH2010_2.
+
+cor(data.frame(new_w,sampW1960_1, sampW1960_2, sampW2010_1, sampW2010_2))[1,]
+#  new_w     sampW1960_1  sampW1960_2  sampW2010_1  sampW2010_2 
+# 1.00000000  0.05466535  0.07260677  -0.52155254   0.56718368 
+##> cor(sampW1960_1,sampW2010_1)
+##[1] -0.2541292
+## Since sampW1960s have weak correaltion with sampW2010s and only sampW2010_2 has contribution in new_w,
+## new_w has really weak correlation with sampW1960s but ralatively strong correlation with sampW2010s.
+
+#18
+fit6 = lm(new_w~permute_w*sampW2010_2*sampH2010_2)
+summary(fit6)
+## adjusted r-squred = 1.
+## new_w_hat = -3.295e-11 + 0.6*permute_w + 1*sampW2010_2 + 1.931e-11*sampH2010_2 + 
+###   (-2.226e-15)*(permute_w*sampW2010_2) + (-1.052e-13)*(permute_w*sampH2010_2) +
+###   (-0.3)*(sampW2010_2*sampH2010_2) + (1.302e-15)*(permute_w*sampW2010_2*sampH2010_2)
+
+
+#19
+fit7 = lm(new_w~permute_w*sampW2010_2*sampH2010_2*sampWXXXX)
+summary(fit7)
+## adjusted r-squared = 1.
+## new_w_hat = (1.589e-10) + 0.6*permute_w + 1*sampW2010_2 + (-9.614e-11)*sampH2010_2
+###    + (2.247e-14)*(permute_w*sampW2010_2) + (5.062e-13)*(permute_w*sampH2010_2)
+###    + (0.3)*(sampW2010_2*sampH2010_2) + (1.278e-14)*(sampW2010_2*sampWXXXX) 
+###    + (-1.354e-14)*(permute_w*sampW2010_2*sampH2010_2)
+###    + (-6.813e-17)*(permute_w*sampW2010_2*sampWXXXX)
+###    + (-7.644e-15)*(sampW2010_2*sampH2010_2*sampWXXXX)
+###    + (4.080e-17)*(permute_w*sampW2010_2*sampH2010_2*sampWXXXX)
+
+## There are 4 coefficients not defined because of singularities due to too weak and 
+## too strong correlations between sampWXXXX and permute_w, and sampW2010_2, respectively.
+
+
 
 #################################################################
 ###Assign8###
