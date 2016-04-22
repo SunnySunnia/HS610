@@ -115,7 +115,9 @@ Data Reshaping with melt: (look at assignments)
 Variables:  
 Predictor, Response Variables  
 Correlated, Confounding variables(people have critical conditions tend to get vaccines, causing people had vaccine to have longer LOS  ****************  
-`pcor()` screens out  
+`pcor()` obtains partial correlation between variables   
+`cor.test(penalties$Scored, penalties$Previous) `  
+
 
 **Descriptive Statistics:**   
   Statistics that describe a *dataset rather than infer information about a related *population  
@@ -129,7 +131,12 @@ Correlated, Confounding variables(people have critical conditions tend to get va
      population estimates  
         normality test: `shapiro.test()`  
         t-test     
+        `t.test(x, y = NULL, alternative = c("two.sided", "less", "greater"), mu = 0, paired = FALSE, var.equal = FALSE,conf.level = 0.95, ...)`  
+            `t.test(babies2$age, mu=27)`  
+            `t.test(babies$bwt, babies2$bwt)`  
         paired t-test: when the two samples are relating to each other, same leangths  
+            `t.test(babies$bwt, babies2$bwt, paired = T)`
+        `t.test(PSWQ~Scored, data = data)` if Scored is binary factors.  
      hypothesis testing:  
         p-values  
         confidence intervals  
@@ -137,6 +144,7 @@ Correlated, Confounding variables(people have critical conditions tend to get va
 **Regression Models:**   
 When is it appropriate to use:  
 **Linear Regression**  
+    `lm(Y~X1+X2..., data = data)`
       Response/outcome variable is numeric  
       `y_hat = = beta_0 + beta_1* X1 + beta_2* X2`
    fitted coeficients, p-values  
@@ -147,6 +155,7 @@ When is it appropriate to use:
    anova: measure eof goodness of fit  
    
 **Logistic Regression**  
+    `glm(Y~X, family = binomial(link=logit), data = data)`
       Response/outcome variable is categorical  
       `log (p(positive)/p(negative) ) = beta_0 + beta_1* X1 + beta_2* X2` 
    fitted coeficients, p-values  
@@ -154,6 +163,8 @@ When is it appropriate to use:
    meaning of equation  
    AIC, Residual error, model error  
      
+`predict(fit_model, type="response")`  
+`anova(fit_1, fit_2, test = "Chsq")`  
 
 ~~SQL~~  
 
