@@ -11,6 +11,24 @@ Dichotomous (Binary), Categorical(Nominal), Ordinal(categorical data with ordere
 plots of theoretical distributions vs smooth density distribution(own sample)  
 plot of dnorm is theoretical  
 geom_density is smooth density estimate    
+
+    /Histograms and density plots/  
+    g <- ggplot(babies3, aes(x=birthweight, fill=age.level))  
+    
+    /Overlaid histograms with position="identity"/  
+    g + geom_histogram(binwidth=10, alpha=.5, position="identity")  
+
+    /Interleaved histograms with position="dodge"/  
+    g + geom_histogram(binwidth=10, position="dodge")  
+
+    /Density is used compare distributions with very different counts/  
+    g + geom_density()  
+    
+    /Density plots with semi-transparent fill/  
+    g + geom_density(alpha=.4)  
+    
+  `qqnorm(rnorm(1000,10,4)); qqline(rnorm(1000,10,4), col = 2,lwd=2)`  
+  
 when we dont have equal set to compare--use density plots(pdf), easier to compare   
 ~~kernel density: density(x, ...), not theoretical~~  
 
@@ -23,13 +41,48 @@ understanding R functions
 Writing R Functions   
 Control Statements  
   if, ifelse(vectors, for cleaning data), loops   
-dplyr - Introduction-HD 720p.mov   
- select, %in%, **************************  
+dplyr - Introduction-HD 720p.mov
+    select (return new df that is subset of **columns**: like select in SQL)  
+    `select(msleep, starts_with("sl"))`   
+    `distinct(select(msleep, order))`  
+    filter (return  new df that is subset of **rows** that meet logical condition: like where clause)  
+    `filter(msleep,sleep_total >=12 & sleep_total<=15)`  
+    `msleep %>% filter(sleep_total <12 | awake >12) %>% select(sleep_total, awake) %>% head` 
+    arrange: (return new df that has reordered rows: like  orderby, can use desc)  
+    `msleep%>% select(name, order, sleep_total) %>% arrange(order, sleep_total)`
+    rename:  (return new df that with variable(s) renamed) 
+    mutate: (return  new df with transformed or new variables)  
+    `msleep <- mutate(msleep,rem_proportion=sleep_rem/sleep_total)`  
+    summarize values: 
+    `msleep %>% summarize(avg_sleep=mean(sleep_total))`
+    group_by: takes an existing tbl and converts it into a grouped tbl
+    ```
+    msleep %>% group_by(order) %>% summarize(avg_sleep=mean(sleep_total),
+                                         min_Sleep=min(sleep_total),
+                                         max_sleep=max(sleep_total),
+                                         std_sleep=sd(sleep_total),
+                                         total = n())
+    ```
+    %in%: whether a set is a subset of another set  
+    ```
+    > 1:6 %in% 0:36
+    [1] TRUE TRUE TRUE TRUE TRUE TRUE
+    ```
+ 
 Data Reshaping with melt: (look at assignments)  
-
+    --> variable, value  
 
 **Manipulating Strings:**   
- sprintf, rep (predict output)  
+ sprintf
+ ```
+ > sprintf("%s is %f and %s", "Now", 5, "a half")
+  [1] "Now is 5.000000 and a half"
+ ```  
+ rep (predict output)  
+ ```
+  > rep('hello',3)
+  [1] "hello" "hello" "hello"
+ ```
  Simulation - Generating Random Numbers-HD 720p.mov  
    
 **Distributions:**  
