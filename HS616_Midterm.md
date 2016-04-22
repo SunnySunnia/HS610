@@ -120,7 +120,7 @@ Correlated, Confounding variables(people have critical conditions tend to get va
 
 
 **Descriptive Statistics:**   
-  Statistics that describe a *dataset rather than infer information about a related *population  
+  Statistics that describe a *dataset* rather than infer information about a related *population*    
      central tendency: mean, median, mode*  
      spread: variance, standard deviation  
      dispersion: range, quartiles  
