@@ -460,7 +460,7 @@ babies2$age.level#optional, shows ordering
 #1 save babies2 as babies2.Rdata
 save(babies2,file = "babies2.Rdata")
 #   save babies2 as babies2.csv
-save(babies2, file = "babies2.csv")
+write.csv(babies2, file = "babies2.csv")
 
 #2
 library(dplyr)
@@ -2298,3 +2298,632 @@ g=ggplot(df4plot, aes(x=value, fill=variable))
 g+geom_density( position="identity")
 
 runif(10, 1,10)
+
+
+
+##############################################################
+##13_1########
+#install.packages("tidyr")
+
+setwd("/Users/Pat/Documents/R/HS_616/assign/DB")
+
+data_dir <- "FNDDS_2011"
+
+fortification <- c(`0`="none", `1`="fortified_product", `2`="contains fortified ingredients")
+
+fndds_tables <- list(
+  AddFoodDesc = list(
+    title="Additional Food Descriptions",
+    column_types=c(
+      food_code="integer", # foreign key
+      seq_num="integer", 
+      start_date="date", 
+      end_date="date", 
+      additional_food_description="text"),
+    sep="^"
+  ),
+  FNDDSNutVal = list(
+    title="FNDDS Nutrient Values",
+    column_types=c(
+      food_code="integer",
+      nutrient_code="integer",	# Nutrient Descriptions table
+      start_date="date", 
+      end_date="date", 
+      nutrient_value="double"
+    ),
+    sep="^"
+  ),
+  FNDDSSRLinks = list(
+    title="FNDDS-SR Links",	# see p34 of fndds_2011_2012_doc.pdf
+    column_types=c(
+      food_code="integer",
+      start_date="date", 
+      end_date="date", 
+      seq_num="integer",
+      sr_code="integer",
+      sr_descripton="text",
+      amount="double",
+      measure="char[3]",	# lb, oz, g, mg, cup, Tsp, qt, fluid ounce, etc
+      portion_code="integer",
+      retention_code="integer",
+      flag="integer",
+      weight="double",
+      change_type_to_sr_code="char[1]",	# D=data change; F=food change
+      change_type_to_weight="char[1]",
+      change_type_to_retn_code="char[1]"
+    ),
+    sep="^"
+  ),
+  FoodPortionDesc = list(
+    title="Food Portion Descriptions",
+    column_types=c(
+      portion_code="integer", 	# foreign key
+      start_date="date",
+      end_date="date",
+      portion_description="text",
+      change_type="char[1]"
+    ),
+    sep="^"
+  ),
+  FoodSubcodeLinks = list(
+    title="Food code-subcode links",
+    column_types=c(
+      food_code="integer",
+      subcode="integer",
+      start_date="date",
+      end_date="date"
+    ),
+    sep="^"
+  ),
+  FoodWeights = list(
+    title="Food Weights",
+    column_types=c(
+      food_code="integer",	# foreign key
+      subcode="integer",
+      seq_num="integer",
+      portion_code="integer",	# food portion description id
+      start_date="date",
+      end_date="date",
+      portion_weight="double",	# missing values = -9
+      change_type="char[1]"	# D=data change, F=food change
+    ),
+    sep="^"
+  ),
+  MainFoodDesc = list(
+    title="Main Food Descriptions",
+    column_types=c(
+      food_code="integer", 
+      start_date="date", 
+      end_date="date", 
+      main_food_description="character", 
+      fortification_id="integer"),
+    sep="^"
+  ),
+  ModDesc = list(
+    title="Modifications Descriptons",
+    column_types=c(
+      modification_code="integer",
+      start_date="date", 
+      end_date="date", 
+      modification_description="text",
+      food_code="integer"
+      
+    ),
+    sep="^"
+  ),
+  ModNutVal = list(
+    title="Modifications Nutrient Values",
+    column_types=c(
+      modification_code="integer",
+      nutrient_code="integer",
+      start_date="date", 
+      end_date="date", 
+      nutrient_value="double"
+    ),
+    sep="^"
+  ),
+  MoistNFatAdjust = list(
+    title="Moisture & Fat Adjustments",	# to account for changes during cooking
+    column_types=c(
+      food_code="integer",
+      start_date="date", 
+      end_date="date", 
+      moisture_change="double",
+      fat_change="double",
+      type_of_fat="integer"	# SR code or food code				
+    ),
+    sep="^"
+  ),
+  NutDesc = list(
+    title="Nutrient Descriptions",
+    column_types=c(
+      nutrient_code="integer",
+      nutrient_description="text",
+      tagname="text",
+      unit="text",
+      decimals="integer"	# decimal places
+    ),
+    sep="^"
+  ),
+  SubcodeDesc = list(
+    title="Subcode Descriptions",
+    column_types=c(
+      subcode="integer",	# key; 0=use default gram weights
+      start_date="date",
+      end_date="date",
+      subcode_description="text"
+    ),
+    sep="^"
+  )
+)
+
+# flat file to a data frame: call for each table
+assign_data_frame <- function(tbl_name){
+  tbl <- read.table(
+    file.path(data_dir, paste0(tbl_name, ".txt")), 
+    sep="^",
+    quote="~",
+    stringsAsFactors=FALSE)
+  # drop last (empty) column
+  tbl <- tbl[1:(length(tbl)-1)]
+  names(tbl) <- names(fndds_tables[[tbl_name]][["column_types"]])
+  assign(tbl_name, tbl, envir = .GlobalEnv)
+}
+
+# flat file to database
+fndds2sqlite <- function(data_dir, table_details, sqlite_filename){
+  
+  library("RSQLite")
+  con <- dbConnect(SQLite(), sqlite_filename)
+  
+  for (tbl_name in names(table_details)){
+    file_name <- paste0(tbl_name, ".txt")
+    assign_data_frame(tbl_name)
+    tbl <- get(tbl_name)
+    dbWriteTable(con, tbl_name, tbl, row.names = FALSE)
+  }
+  
+  dbDisconnect(con)
+}
+
+fndds2sqlite("FNDDS_2011", fndds_tables, "fndds.sqlite")
+library(DBI)
+
+for (tbl in c("FNDDSNutVal", "MainFoodDesc", "NutDesc"))
+  assign_data_frame(tbl)
+
+library(dplyr)
+library(tidyr)
+
+# Make a simplified selection of foods.
+# TO DO: have MainFoodDesc be a tbl sourced from SQLite.
+get_selected_foods <- function(){
+  # Pull out all "Not Further Specified" foods as a wide selection of reasonably generic items.
+  generics <- MainFoodDesc %>% 
+    filter( grepl(", NFS", main_food_description )) %>%
+    filter(!grepl("infant formula", main_food_description, ignore.case = TRUE ) )
+  
+  # Raw fruits
+  # Berries are covered by "Berries, raw, NFS" and "Berries, frozen, NFS"
+  fruits <- MainFoodDesc %>% 
+    filter( grepl("^6", food_code) ) %>%
+    filter( grepl("^([^,\\(]+), raw$", main_food_description) ) %>% 
+    filter( !grepl("berries", main_food_description) )
+  
+  # Raw vegetables
+  # Potatoes are covered by "White potato, NFS", "Sweet potato, NFS", etc.
+  vegetables <- MainFoodDesc %>% 
+    filter( grepl("^7", food_code) ) %>%
+    filter(!grepl("potato", main_food_description)) %>%
+    filter( grepl(", raw$", main_food_description))
+  
+  # 4="legumes, nuts, and seeds"
+  nuts_and_seeds <- MainFoodDesc %>% 
+    filter( grepl("^4", food_code) ) %>%
+    mutate( firstWord = strsplit(main_food_description, " ")[[1]][1] )
+  
+  # Selected alcoholic beverages
+  # All alcoholic beverages: grepl("^93", food_code))
+  # "Cocktail, NFS" already gives us "Cocktail"
+  alcoholic_beverages <- MainFoodDesc %>% 
+    filter( main_food_description %in% c("Beer", "Wine, table, red", "Wine, table, white", 
+                                         "Whiskey", "Gin", "Rum", "Vodka") )
+  
+  # Collect them all into one table
+  rbind(generics, fruits, vegetables, alcoholic_beverages) %>%
+    select( food_code, main_food_description, fortification_id )  %>% 
+    filter( nchar(main_food_description) < 20 ) %>%
+    mutate( main_food_description = gsub("(, NFS|, raw)", "", main_food_description) ) 
+  
+}
+
+foods <- get_selected_foods()	# 163 items
+
+library(sqldf)
+long_food_nutrients <- sqldf("SELECT f.main_food_description, nd.nutrient_description, nv.nutrient_value 
+                             FROM foods f 
+                             INNER JOIN FNDDSNutVal nv ON f.food_code = nv.food_code 
+                             INNER JOIN NutDesc nd ON nv.nutrient_code = nd.nutrient_code") 
+
+nutrient_food_df <- spread(long_food_nutrients, main_food_description, nutrient_value, fill=0)
+
+food_nutrient_mat <- t(as.matrix(nutrient_food_df[-1]))
+colnames(food_nutrient_mat) <- nutrient_food_df$nutrient_description
+
+save(food_nutrient_mat, file="../week_03_linear_algebra/food_nutrient_mat.Rdata")
+saveRDS(foods, file="../week_03_linear_algebra/foods.rds")
+
+################################################
+###13_1_2##
+# A database interface (DBI) definition for communication between R and relational database management systems. 
+# All classes in this package are virtual and need to be extended by the various R/DBMS implementations
+library(DBI)
+library(RSQLite)
+# Create temporary in-memory db
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+# imports a local data frame or file into the database.
+dbWriteTable(con, "mtcars", mtcars, row.names = FALSE) # mtcars is part of base R
+dbListTables(con)
+sqliteCopyDatabase(con, "mtcars.db")   # save database to datbase file
+dbDisconnect(con)
+
+# This package embeds the SQLite database engine in R and
+#  provides an interface compliant with the DBI package
+
+
+# all data frames in the datasets package are bundled with RSQLite; use connection datasetsDb()
+dsets <- datasetsDb() 
+dbListTables(dsets)
+
+# dbGetQuery is combination of dbSendQuery, dbFetch and dbClearResult
+dbGetQuery(dsets, "select * from iris limit 10")
+
+
+res <- dbSendQuery(dsets, "select * from iris limit 10")  # limits the resultset itself
+dbGetRowCount(res)
+dbFetch(res, n = 02)  # fetches first 2 rows of resultset, can get more later
+dbGetRowCount(res)
+dbHasCompleted(res)
+dbFetch(res)  #  fetches the rest of the resultset
+
+res <- dbGetPreparedQuery(dsets, "SELECT * FROM USArrests WHERE Murder < ?", data.frame(x = 3)) 
+# where murder < 3
+head(res) # res us a data  frame
+
+res <- dbSendQuery(dsets, "SELECT * FROM mtcars WHERE cyl = 4")
+while(!dbHasCompleted(res)){
+  chunk <- dbFetch(res, n = 10) # fetches 10 rows at at time from resultset
+  print(nrow(chunk))
+}
+
+res <- dbSendQuery(dsets, "SELECT * FROM mtcars WHERE cyl = 4")
+dbFetch(res)  # fetches all rows from resultset
+dbClearResult(res)
+#alt:use dbGetQuery which sends, fetches and  clears for you.
+
+sqliteCopyDatabase(dsets, "datasets.sqlite")   # save database to datbase file
+dbDisconnect(dsets) ### moved
+
+#####################################################
+con <- dbConnect(RSQLite::SQLite(), "mtcars.db") # existing database file, not flat file
+dbListTables(con)
+dbReadTable(con, "mtcars")
+
+dbExistsTable(con, "mtcars")
+res <- dbSendQuery(con, "select * from mtcars")  
+dbFetch(res)  #  fetches the entire resultset
+dbClearResult(con)
+dbDisconnect(con)
+
+
+# http://stackoverflow.com/questions/38549/difference-between-inner-and-outer-joins
+library(RSQLite)
+con <- dbConnect(SQLite(), "inner_outer.sqlite")
+
+a <- data.frame(A=1:4)
+b <- data.frame(B=3:6)
+
+# imports a local data frame or file into the database.
+dbWriteTable(con, "a", a, row.names = FALSE)
+dbWriteTable(con, "b", b)
+dbGetQuery(con, "select * from a INNER JOIN b on a.a = b.b;")
+dbGetQuery(con, "select a.*,b.*  from a,b where a.a = b.b;")
+dbGetQuery(con, "select * from a LEFT OUTER JOIN b on a.a = b.b;")
+##everything in the left table and the matching from the right table. 
+dbDisconnect(con)
+
+
+# Sandy Muspratt: Creating SQLite databases from R
+# http://sandymuspratt.blogspot.com/2012/11/r-and-sqlite-part-1.html
+# Two ways in which R can communicate with SQLite databases: 
+#   using the RSQLite package and using the sqldf package. 
+# Both packages use reasonably standard versions of SQL to administer and manage the database
+#  but they differ in the way meta statements are constructed.
+
+# First, the required packages are loaded. Both RSQLite and sqldf
+# (and others too) are loaded by the following command.
+library(sqldf)
+
+#setwd("/Users/Pat/Documents/R/HS_616/assign/DB")
+db <- dbConnect(SQLite(), dbname="babies.sqlite")
+#install.packages("tcltk")
+library(tcltk)
+# The following sqldf command creates babies.sqlite in R's working directory.
+sqldf("attach 'babies.sqlite' as new")
+
+# 1: import data from csv file into data frame, from data frame to table babies
+babies2 <- read.csv("babies2.csv", header=T)
+names(babies2)[9] <- "age_level"
+dbWriteTable(conn = db, name = "babies", value = babies2, row.names = FALSE) # leave out header
+dbListFields(db, "babies")         # The columns in a table
+dbReadTable(db, "babies")      # The data in a babies table
+dbDisconnect(db)
+
+# 2: import data directly from csv file into the table babies
+dbWriteTable(conn = db, name = "babies", value = "babies2.csv",
+             row.names = FALSE, header = TRUE)
+dbListTables(db)                   # The tables in the database
+dbListFields(db, "babies")         # The columns in a table
+dbReadTable(db, "babies")          # The data in a table
+# if the file displays  \r line endings then it was created on a windows machine:
+# drop the tables and re-import with eol = "\r\n"
+dbRemoveTable(db, "babies")   # Remove the table
+dbWriteTable(conn = db, name = "babies", value = "babies2.csv",
+             row.names = FALSE, header = TRUE, eol = "\r\n")
+dbReadTable(db, "babies")          # The data in a table
+dbGetQuery(db, "select age_level from babies")
+dbGetQuery(db, "select distinct(age_level) from babies")
+
+#####################################################################
+##13_1_2
+#install.packages("tidyr")
+library(tidyr)
+setwd("C:/HS616/LectureCodes")
+
+data_dir <- "FNDDS_2011"
+
+fortification <- c(`0`="none", `1`="fortified_product", `2`="contains fortified ingredients")
+
+fndds_tables <- list(
+  AddFoodDesc = list(
+    title="Additional Food Descriptions",
+    column_types=c(
+      food_code="integer", # foreign key
+      seq_num="integer", 
+      start_date="date", 
+      end_date="date", 
+      additional_food_description="text"),
+    sep="^"
+  ),
+  FNDDSNutVal = list(
+    title="FNDDS Nutrient Values",
+    column_types=c(
+      food_code="integer",
+      nutrient_code="integer",	# Nutrient Descriptions table
+      start_date="date", 
+      end_date="date", 
+      nutrient_value="double"
+    ),
+    sep="^"
+  ),
+  FNDDSSRLinks = list(
+    title="FNDDS-SR Links",	# see p34 of fndds_2011_2012_doc.pdf
+    column_types=c(
+      food_code="integer",
+      start_date="date", 
+      end_date="date", 
+      seq_num="integer",
+      sr_code="integer",
+      sr_descripton="text",
+      amount="double",
+      measure="char[3]",	# lb, oz, g, mg, cup, Tsp, qt, fluid ounce, etc
+      portion_code="integer",
+      retention_code="integer",
+      flag="integer",
+      weight="double",
+      change_type_to_sr_code="char[1]",	# D=data change; F=food change
+      change_type_to_weight="char[1]",
+      change_type_to_retn_code="char[1]"
+    ),
+    sep="^"
+  ),
+  FoodPortionDesc = list(
+    title="Food Portion Descriptions",
+    column_types=c(
+      portion_code="integer", 	# foreign key
+      start_date="date",
+      end_date="date",
+      portion_description="text",
+      change_type="char[1]"
+    ),
+    sep="^"
+  ),
+  FoodSubcodeLinks = list(
+    title="Food code-subcode links",
+    column_types=c(
+      food_code="integer",
+      subcode="integer",
+      start_date="date",
+      end_date="date"
+    ),
+    sep="^"
+  ),
+  FoodWeights = list(
+    title="Food Weights",
+    column_types=c(
+      food_code="integer",	# foreign key
+      subcode="integer",
+      seq_num="integer",
+      portion_code="integer",	# food portion description id
+      start_date="date",
+      end_date="date",
+      portion_weight="double",	# missing values = -9
+      change_type="char[1]"	# D=data change, F=food change
+    ),
+    sep="^"
+  ),
+  MainFoodDesc = list(
+    title="Main Food Descriptions",
+    column_types=c(
+      food_code="integer", 
+      start_date="date", 
+      end_date="date", 
+      main_food_description="character", 
+      fortification_id="integer"),
+    sep="^"
+  ),
+  ModDesc = list(
+    title="Modifications Descriptons",
+    column_types=c(
+      modification_code="integer",
+      start_date="date", 
+      end_date="date", 
+      modification_description="text",
+      food_code="integer"
+      
+    ),
+    sep="^"
+  ),
+  ModNutVal = list(
+    title="Modifications Nutrient Values",
+    column_types=c(
+      modification_code="integer",
+      nutrient_code="integer",
+      start_date="date", 
+      end_date="date", 
+      nutrient_value="double"
+    ),
+    sep="^"
+  ),
+  MoistNFatAdjust = list(
+    title="Moisture & Fat Adjustments",	# to account for changes during cooking
+    column_types=c(
+      food_code="integer",
+      start_date="date", 
+      end_date="date", 
+      moisture_change="double",
+      fat_change="double",
+      type_of_fat="integer"	# SR code or food code				
+    ),
+    sep="^"
+  ),
+  NutDesc = list(
+    title="Nutrient Descriptions",
+    column_types=c(
+      nutrient_code="integer",
+      nutrient_description="text",
+      tagname="text",
+      unit="text",
+      decimals="integer"	# decimal places
+    ),
+    sep="^"
+  ),
+  SubcodeDesc = list(
+    title="Subcode Descriptions",
+    column_types=c(
+      subcode="integer",	# key; 0=use default gram weights
+      start_date="date",
+      end_date="date",
+      subcode_description="text"
+    ),
+    sep="^"
+  )
+)
+
+# flat file to a data frame: call for each table
+assign_data_frame <- function(tbl_name){
+  tbl <- read.table(
+    file.path(data_dir, paste0(tbl_name, ".txt")), 
+    sep="^",
+    quote="~",
+    stringsAsFactors=FALSE)
+  # drop last (empty) column
+  tbl <- tbl[1:(length(tbl)-1)]
+  names(tbl) <- names(fndds_tables[[tbl_name]][["column_types"]])
+  assign(tbl_name, tbl, envir = .GlobalEnv)
+}
+
+# flat file to database
+fndds2sqlite <- function(data_dir, table_details, sqlite_filename){
+  
+  library("RSQLite")
+  con <- dbConnect(SQLite(), sqlite_filename)
+  
+  for (tbl_name in names(table_details)){
+    file_name <- paste0(tbl_name, ".txt")
+    assign_data_frame(tbl_name)
+    tbl <- get(tbl_name)
+    dbWriteTable(con, tbl_name, tbl, row.names = FALSE)
+  }
+  
+  dbDisconnect(con)
+}
+
+library(DBI)
+fndds2sqlite("FNDDS_2011", fndds_tables, "fndds.sqlite")
+
+
+for (tbl in c("FNDDSNutVal", "MainFoodDesc", "NutDesc"))
+  assign_data_frame(tbl)
+
+library(dplyr)
+library(tidyr)
+
+# Make a simplified selection of foods.
+# TO DO: have MainFoodDesc be a tbl sourced from SQLite.
+get_selected_foods <- function(){
+  # Pull out all "Not Further Specified" foods as a wide selection of reasonably generic items.
+  generics <- MainFoodDesc %>% 
+    filter( grepl(", NFS", main_food_description )) %>%
+    filter(!grepl("infant formula", main_food_description, ignore.case = TRUE ) )
+  
+  # Raw fruits
+  # Berries are covered by "Berries, raw, NFS" and "Berries, frozen, NFS"
+  fruits <- MainFoodDesc %>% 
+    filter( grepl("^6", food_code) ) %>%
+    filter( grepl("^([^,\\(]+), raw$", main_food_description) ) %>% 
+    filter( !grepl("berries", main_food_description) )
+  
+  # Raw vegetables
+  # Potatoes are covered by "White potato, NFS", "Sweet potato, NFS", etc.
+  vegetables <- MainFoodDesc %>% 
+    filter( grepl("^7", food_code) ) %>%
+    filter(!grepl("potato", main_food_description)) %>%
+    filter( grepl(", raw$", main_food_description))
+  
+  # 4="legumes, nuts, and seeds"
+  nuts_and_seeds <- MainFoodDesc %>% 
+    filter( grepl("^4", food_code) ) %>%
+    mutate( firstWord = strsplit(main_food_description, " ")[[1]][1] )
+  
+  # Selected alcoholic beverages
+  # All alcoholic beverages: grepl("^93", food_code))
+  # "Cocktail, NFS" already gives us "Cocktail"
+  alcoholic_beverages <- MainFoodDesc %>% 
+    filter( main_food_description %in% c("Beer", "Wine, table, red", "Wine, table, white", 
+                                         "Whiskey", "Gin", "Rum", "Vodka") )
+  
+  # Collect them all into one table
+  rbind(generics, fruits, vegetables, alcoholic_beverages) %>%
+    select( food_code, main_food_description, fortification_id )  %>% 
+    filter( nchar(main_food_description) < 20 ) %>%
+    mutate( main_food_description = gsub("(, NFS|, raw)", "", main_food_description) ) 
+  
+}
+
+foods <- get_selected_foods()	# 163 items
+
+library(sqldf)
+long_food_nutrients <- sqldf("SELECT f.main_food_description, nd.nutrient_description, nv.nutrient_value 
+                             FROM foods f 
+                             INNER JOIN FNDDSNutVal nv ON f.food_code = nv.food_code 
+                             INNER JOIN NutDesc nd ON nv.nutrient_code = nd.nutrient_code") 
+
+nutrient_food_df <- spread(long_food_nutrients, main_food_description, nutrient_value, fill=0)
+
+food_nutrient_mat <- t(as.matrix(nutrient_food_df[-1]))
+colnames(food_nutrient_mat) <- nutrient_food_df$nutrient_description
+
+save(food_nutrient_mat, file="../week_03_linear_algebra/food_nutrient_mat.Rdata")
+saveRDS(foods, file="../week_03_linear_algebra/foods.rds")
+
