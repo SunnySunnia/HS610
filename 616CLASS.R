@@ -2927,3 +2927,390 @@ colnames(food_nutrient_mat) <- nutrient_food_df$nutrient_description
 save(food_nutrient_mat, file="../week_03_linear_algebra/food_nutrient_mat.Rdata")
 saveRDS(foods, file="../week_03_linear_algebra/foods.rds")
 
+long_food_nutrients1$categories = 0
+for (i in 1:nrow(long_food_nutrients1)){
+  if (grep("^1", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="dairy"
+  }
+  else if (grep("^2", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="meat,fish"
+  }
+  else if (grep("^3", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="eggs"
+  }
+  else if (grep("^4", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="legumes,nuts,seeds"
+  }
+  else if (grep("^5", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="grains"
+  }
+  else if (grep("^6", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="fruits"
+  }
+  else if (grep("^7", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="vegetables"
+  }
+  else if (grep("^8", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="fats"
+  }
+  else if (grep("^91", long_food_nutrients1$food_code[i])>0 |grep("^92", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="sugars"
+  }
+  else if (grep("^93", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="alcohol"
+  }
+  else if(grep("^95", long_food_nutrients1$food_code[i])>0){
+    long_food_nutrients1$categories[i]="protein powder"
+  }
+  print(i)
+}
+
+
+
+food_nutrient_df = mutate(food_nutrient_df, category = ifelse(length(grep("^1", food_nutrient_df$food_code))>0, "dairy", ifelse(length(grep("^2", food_nutrient_df$food_code))>0, "meat,fish", ifelse(length(grep("^3", food_nutrient_df$food_code))>0, "eggs", ifelse(length(grep("^4", food_nutrient_df$food_code))>0, "legumes,nuts,seeds", ifelse(length(grep("^5", food_nutrient_df$food_code))>0,"grains",ifelse(length(grep("^6", food_nutrient_df$food_code))>0, "fruits", ifelse(length(grep("^7", food_nutrient_df$food_code))>0,"vegetables",ifelse(length(grep("^8", food_nutrient_df$food_code))>0,"fats", ifelse(length(grep("^91", food_nutrient_df$food_code))>0|length(grep("^92", food_nutrient_df$food_code))>0,"sugars", ifelse(length(grep("^93", food_nutrient_df$food_code))>0,"alcohol", "protein powder")))))))))))
+
+
+
+
+#################################################
+##Last lecture##  
+
+
+# Data simulation
+# Assignment 6 involved data simulation
+# Below is information on simulating a boolean variable 
+#  taken Tom DeNatale's data simulation project:
+#  https://github.com/tdenatale/hs616/blob/master/Final_project.Rmd
+
+logistic <- function(t) 1 / (1 + exp(-t))
+
+vec <- .1* (1:200) - 10
+logistic(vec)
+plot(vec)
+plot(logistic(vec))
+plot(logistic(vec))
+
+
+logistic(-10)
+logistic(0.01)
+logistic(1)
+logistic(10)
+
+set.seed(123)
+N<- 100 # out of 100 roll of the dice
+age1 <- 20
+age2 <- 50
+age3 <- 80
+# .08 reduces the value more than .19
+# so fewer of the uniform random numbers will be below the value
+# runif(N) is the default: numbers between 0 and 1
+DIAB1 <- runif(N)< .08*logistic((age1-50)/10) 
+DIAB1
+DIAB2 <- runif(N)< .08*logistic((age2-50)/10) #logistic(0)= .5
+DIAB2
+DIAB3 <- runif(N)< .08*logistic((age3-50)/10)
+DIAB3
+CANC1 <- runif(N)< .19*logistic((age1-40)/10) # higher values since subtracting less
+CANC1
+CANC2 <- runif(N)< .19*logistic((age2-40)/10) # not reduced by as much
+CANC2
+CANC3 <- runif(N)< .19*logistic((age3-40)/10) # so more runif fall below
+CANC3                            # here there are more people with cancer than diabetes
+
+
+#################################################################
+##PCA/Decision Tree/RFE
+library (ggplot2)
+#install.packages("foreign")
+#install.packages("useful")
+#install.packages("rpart.plot")
+#install.packages("randomForest")
+library(foreign)
+library (stats)
+
+
+logisticPseudoR2s <- function(LogModel) {
+  dev <- LogModel$deviance 
+  nullDev <- LogModel$null.deviance 
+  modelN <-  length(LogModel$fitted.values)
+  R.l <-  1 -  dev / nullDev
+  R.cs <- 1- exp ( -(nullDev - dev) / modelN)
+  R.n <- R.cs / ( 1 - ( exp (-(nullDev / modelN))))
+  cat("Pseudo R^2 for logistic regression\n")
+  cat("Hosmer and Lemeshow R^2  ", round(R.l, 3), "\n")
+  cat("Cox and Snell R^2        ", round(R.cs, 3), "\n")
+  cat("Nagelkerke R^2           ", round(R.n, 3),    "\n")
+}
+
+
+diab <- read.arff("http://www.cs.usfca.edu/~pfrancislyon/uci-diabetes.arff")
+summary(diab)
+
+# 1. Number of times pregnant
+# 2. Plasma glucose concentration a 2 hours in an oral glucose tolerance test
+# 3. Diastolic blood pressure (mm Hg)
+# 4. Triceps skin fold thickness (mm)
+# 5. 2-Hour serum insulin (mu U/ml)
+# 6. Body mass index (weight in kg/(height in m)^2)
+# 7. Diabetes pedigree function
+# 8. Age (years)
+# 9. Class variable (tested negative or tested positive)
+
+# Correct zeros that should be NA
+# Note that zero pregnancies is valid, but the following are not
+diab$plas <- ifelse(diab$plas==0,NA, diab$plas)
+diab$pres <- ifelse(diab$pres==0,NA, diab$pres)
+diab$skin <- ifelse(diab$skin==0,NA, diab$skin)
+diab$insu <- ifelse(diab$insu==0,NA, diab$insu)
+diab$mass <- ifelse(diab$mass==0,NA, diab$mass)
+summary(diab)
+
+
+# density distributions of each variable with fill color determined by diabetes status
+g <- ggplot(data=diab)
+g + geom_histogram(aes(x=preg),binwidth=1, color = 5)  
+
+g + geom_histogram(aes(x=preg, fill=class),binwidth=1,position="dodge")  # position="identity" for overlaid
+g + geom_histogram(aes(x=plas, fill=class), binwidth=1,position="dodge")
+g + geom_histogram(aes(x=pres, fill=class), binwidth=1,position="dodge")
+
+g + geom_histogram(aes(x=skin, fill=class), binwidth=1,position="dodge")
+g + geom_histogram(aes(x=insu, fill=class), binwidth=1,position="dodge")
+g + geom_histogram(aes(x=mass, fill=class), binwidth=1,position="dodge")
+
+g + geom_density(aes(x=preg, fill=class), alpha=.5)    
+g + geom_density(aes(x=plas, fill=class), alpha=.5)   
+g + geom_density(aes(x=pres, fill=class), alpha=.5)    
+g + geom_density(aes(x=skin, fill=class), alpha=.5)    
+g + geom_density(aes(x=insu, fill=class), alpha=.5)   
+g + geom_density(aes(x=mass, fill=class), alpha=.5)    
+g + geom_density(aes(x=pedi, fill=class), alpha=.5)   
+g + geom_density(aes(x=age, fill=class), alpha=.5)    
+
+
+#5 Fit a regression model of diabetes as a function of the other variables.
+fit_all <- glm(class ~ ., family = binomial(), data = diab)
+summary(fit_all) #AIC: 362.02, Nagelkerke R^2 0.452
+# Null deviance: 498.10  on 391  degrees of freedom <- about half the observations ***
+# Residual deviance: 344.02  on 383  degrees of freedom
+logisticPseudoR2s(fit_all) 
+
+fit_b<- glm(class ~ preg+ plas + mass + pedi, family = binomial(), data = diab)
+summary(fit_b) #AIC: 714.72, Nagelkerke R^2 0.415
+# Null deviance: 974.75  on 751  degrees of freedom   
+# Residual deviance: 704.72  on 747  degrees of freedom  
+logisticPseudoR2s(fit_b) 
+
+#Above models are not camparable. Difference in DF due to missing data
+
+summary(diab)
+# For PCA I will use all the attributes. 
+#  I don't want to cut ~half of the rows due to NAs, so impute:
+# replace  NAs with either medians or means
+diab2 <- diab
+diab2$plas[is.na(diab2$plas)] <- mean(diab2$plas,na.rm=T)
+diab2$pres[is.na(diab2$pres)] <- mean(diab2$pres,na.rm=T)
+diab2$skin[is.na(diab2$skin)] <- mean(diab2$skin,na.rm=T)
+diab2$insu[is.na(diab2$insu)] <- mean(diab2$insu,na.rm=T)
+diab2$mass[is.na(diab2$mass)] <- mean(diab2$mass,na.rm=T)
+summary(diab2)
+
+
+# NB: with imputed data, null DF and deviances are same
+#  for all models since they use the same observations
+fit_all2 <- glm(class ~ ., family = binomial(), data = diab2)
+summary(fit_all2) #AIC: 731.3, Nagelkerke R^2 0.421 
+# Null deviance: 993.48  on 767  degrees of freedom
+# Residual deviance: 713.30  on 759  degrees of freedom
+logisticPseudoR2s(fit_all2)
+
+fit_b2<- glm(class ~ preg+ plas + mass + pedi, family = binomial(), data = diab2)
+summary(fit_b2) #AIC: 726.18, Nagelkerke R^2 0.418   ***slightly lower AICs, pseudo R^2s
+# Null deviance: 993.48  on 767  degrees of freedom  
+# Residual deviance: 716.18  on 763  degrees of freedom  
+logisticPseudoR2s(fit_b2)
+
+# test fit_all improvement over fit_b2 model  
+anova(fit_b2,fit_all2, test="Chisq") # p-value = 0.5782 
+# indicates improved fit of model fit_all over fit_b2 is insignificant
+
+#PCA
+#install.packages("psych")
+library("psych")
+d2_attrib <- diab2[,1:8]
+
+# PCs, no rotation:
+# Max number of PCs is the number of dimensions in the data:
+fa_all <- principal(d2_attrib, nfactors =8, rotate = "none")
+fa_all # difficult to interpret with no rotation
+rotationall <- data.frame(fa_all$score, class=diab2[,"class"])
+# Often good for modeling with no rotation
+logisticModAll <- glm(class ~  PC1 + PC2 + PC3 + PC4 + PC5 + PC6 + PC7 + PC8, data = rotationall, family = "binomial")
+summary(logisticModAll) #AIC: 731.3, Nagelkerke R^2 0.421 
+logisticPseudoR2s(logisticModAll)
+
+# Removing the insignificant PCs from the model 
+logisticMod5<- glm(class ~  PC1 + PC2 + PC3 + PC6 + PC7, data = rotationall, family = "binomial")
+summary(logisticMod5) #AIC: 728.5 Nagelkerke R^2 0.417 
+logisticPseudoR2s(logisticMod5)
+
+
+# PCs with varimax rotation, max number of PCs:
+fa_all_vm <- principal(d2_attrib, nfactors =8, rotate = "varimax")
+fa_all_vm  #each has its own PC: no structure revealed
+
+# Here we use fewer PCs so we can see some structure in the data:
+# Variables that are correlated share a PC
+fa4_all_vm <- principal(d2_attrib, nfactors =4, rotate = "varimax")
+fa4_all_vm  #
+fa4_all_vm$scale
+
+# Can predict with the PCs, sometimes get a better result or 
+# understanding of the data
+#NB: component scores are standard scores (mean=0, sd = 1) of the standardized input
+rotation4 <- data.frame(fa4_all_vm$score, class=diab2[,"class"])
+logisticMod <- glm(class ~  PC1 + PC2 + PC3 + PC4, data = rotation4, family = "binomial")
+summary(logisticMod) #AIC: 782.51, Nagelkerke R^2 0.345 
+logisticPseudoR2s(logisticMod)
+# Not as good a predictor, but fitted coeficients are revealing 
+# PC3 0.98343 (blood sugar),  PC4 0.41118 (pedigree)
+
+# K-means clustering
+#install.packages("useful")
+library (useful) # for plot.kmeans: attributes reduced to 2 dimensions
+# k-means clustering:
+# for numeric data only, is susceptible to outliers
+clustKM1 <- kmeans(x=diab2[,1:8], centers=2)
+plot(clustKM1,data=diab2[,1:8])
+plot(clustKM1,data=diab2, class="class")
+
+clustKM2 <- kmeans(x=diab2[,1:8], centers=4)
+plot(clustKM2,data=diab2[,1:8])
+plot(clustKM2,data=diab2, class="class")
+
+# recommend that you scale before you cluster *********************
+# also imp for PCA if using prcomp {stats package} instead of above
+scaled_diab2 <- scale(diab2[,1:8])
+clustKM1_s <- kmeans(x=scaled_diab2, centers=2)
+plot(clustKM1_s, data=scaled_diab2)
+plot(clustKM1_s, data=diab2, class="class")
+
+
+# Hierarchical clustering:
+# method = "single", "complete", "average", "centroid"
+#  default is "complete"
+# Complete defines the cluster distance between two clusters 
+#   to be the max distance between their individual components. 
+# At every stage of the clustering process, 
+# the two nearest clusters are merged into a new cluster. 
+#The process is repeated until the whole data set is 
+#  agglomerated into one single cluster.
+hc1 <- hclust(dist(diab2[,1:8]))
+# plot the dendrogram
+plot(hc1)
+
+hc1s <- hclust(dist(scaled_diab2))
+# plot the dendrogram
+plot(hc1s)
+
+
+# original (not imputed) data
+hc2 <- hclust(dist(diab[,1:8]))
+plot(hc2)
+
+hc1 <- hclust(dist(diab2[,1:8]), method = "average")
+# plot the dendrogram
+plot(hc1)
+
+# original (not imputed) data
+hc2 <- hclust(dist(diab[,1:8]), method = "average")
+plot(hc2)
+
+
+# decision Trees
+library(rpart)
+library(rpart.plot)
+diab_tree <- rpart(class ~ ., data=diab2)
+# text version of the resulting tree:
+# great for serialization, difficult to understand
+diab_tree 
+# extra=1: Display the number of observations that fall in the node
+rpart.plot(diab_tree, extra = 1)
+
+# extra=4: Class models: Display probability per class
+# of observations in the node (conditioned on the node,
+# sum across a node is 1).
+rpart.plot(diab_tree, extra = 4)
+
+
+# RF: random forests
+library(randomForest)
+
+diab_rf <- randomForest(class ~ ., data=diab2)
+diab_rf
+
+# if the formula above fails, try building individual predictor and response matrices
+# build.x and bulid.y require pachage ("Useful") as does plot.kmeans above
+formula <- class ~ .
+diab2_x <- build.x(formula, data=diab2)
+diab2_y <- build.y(formula, data=diab2)
+
+diab_rf2 <- randomForest(x=diab2_x, y=diab2_y )
+diab_rf2 # randomness in RF algorithm, so some variation in runs
+
+# 3d plot that can be rotated
+#install.packages("rgl")
+library(rgl)
+plot3d(diab2$mass,diab2$skin, diab2$age,col=as.numeric(diab2$class))
+
+
+########################################################
+##manipulate
+#install.packages("manipulate")
+library("manipulate")
+library("ggplot2")
+
+load("body_dat.rda")
+
+body_dat$wrist_group <- cut(body_dat$wrist_diameter, 
+                            quantile(body_dat$wrist_diameter, probs=0:5/5), 
+                            include.lowest=TRUE)
+
+body_dat$age_group <- cut(body_dat$age, 
+                          quantile(body_dat$age, probs=0:5/5), 
+                          include.lowest=TRUE)
+manipulate(
+  ggplot(data=body_dat, aes_string(x=x_col, y=y_col, col=color)) + geom_point() + geom_smooth(),
+  x_col = picker("weight", "knee_diameter"), 
+  y_col = picker("wrist_group", "height"), 
+  color=picker("gender", "age_group"))
+
+
+
+#############################################################
+##Shiny
+# Bob found this on stackoverflow: http://stackoverflow.com/questions/27072346/r-shiny-dev-on-rstudio-server-shiny-crashes-when-app-launch
+# See also: http://shiny.rstudio.com/articles/function.html
+# Paste into R terminal session to run shiny app without RStudio.
+
+#install.packages("shiny")
+library(shiny)
+
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    hist(rnorm(input$obs), col = 'darkgray', border = 'white')
+  })
+}
+
+ui <- shinyUI(fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("obs", "Number of observations:", min = 10, max = 500, value = 100)
+    ),
+    mainPanel(plotOutput("distPlot"))
+  )
+))
+
+shinyApp(ui = ui, server = server)
+
+

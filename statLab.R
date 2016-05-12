@@ -143,9 +143,16 @@ summary(fit_model_year)
 
 ######################################################
 ###Specificity, sensitivity, etc##
-prevalence=0.5
-sensitivity=2/3
-specificity = 2/3
+#Sensitivity = true positive rate = TP / (TP + FN)
+#Specificity = true negative rate = TN / (TN + FP)
+### Confusion matrix: 
+###            Disease_positive   Disease_negative  
+#Test_positive     TP                 FP
+#Test_negative     FN                 TN
+
+prevalence=1/1000
+sensitivity=0.98
+specificity = 0.99
 recp_specificity=1-specificity
 recp_prevalence=1-prevalence
 prob_cond_disease=(sensitivity*prevalence)/((sensitivity*prevalence)+(recp_specificity)*(recp_prevalence) )
@@ -157,3 +164,59 @@ paste(sensitivity,'*',prevalence,'/((',sensitivity,'*',prevalence,')+(',recp_spe
 prob_cond_disease
 
 ##R-squred = sqrt(t^2/t^2+df) from t-test
+
+
+################################################### 
+##Judging Art## 
+library(Rmpfr)
+library(dplyr)
+Judging_art = read.csv("C:/PSYD755/Judging_art.csv", stringsAsFactors=FALSE)
+m_lip=mean(subset(Judging_art$H_rating, Judging_art$Condition=="Pen in lips"))
+m_no=mean(subset(Judging_art$H_rating, Judging_art$Condition=="No pen"))
+m_teeth=mean(subset(Judging_art$H_rating, Judging_art$Condition=="Pen in teeth"))
+var_means=var(c(m_no,m_lip,m_teeth))
+sum_means_sq = sum(m_no,m_lip,m_teeth)^2
+s2b=sum((m_no^2-(sum_means_sq/3)),(m_lip^2-(sum_means_sq/3)),(m_teeth^2-(sum_means_sq/3)))/2
+n = length(subset(Judging_art$H_rating, Judging_art$Condition=="No pen"))
+MSB = mpfr(n*var_means,100)
+var_no=var(subset(Judging_art$H_rating, Judging_art$Condition=="No pen"))
+var_teeth=var(subset(Judging_art$H_rating, Judging_art$Condition=="Pen in teeth"))
+var_lip=var(subset(Judging_art$H_rating, Judging_art$Condition=="Pen in lips"))
+MSE=sum(var_no,var_teeth,var_lip)/3
+F=MSB/MSE
+
+
+#############################################################
+##Quiz 3 ## 
+
+setwd("C:/PSYD755")
+happy <- read.delim("happy.dat", stringsAsFactors=FALSE)
+#install.packages("pastecs")
+test = t.test(happy~book, data =happy)
+t = test$statistic[[1]]
+df = test$parameter[[1]]
+r = sqrt(t^2/(t^2+df))
+
+superhero = read.delim("superhero.dat", stringsAsFactors = FALSE)
+lm_model = lm(injury~hero, data = superhero)
+summary(lm_model)
+aov_model = aov(injury~hero, data = superhero)
+summary(aov_model)
+oneway.test(injury~hero, data = superhero)
+
+#install.packages("mlbench")
+#install.packages("caret")
+library(mlbench)
+library(caret)
+# load the dataset
+#data(PimaIndiansDiabetes)
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(category~., data=train, method="lvq", preProcess="scale", trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
