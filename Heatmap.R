@@ -1,3 +1,4 @@
+setwd("C:/Health-Informatics-Course-Notes/plots")
 #install.packages("gplots", dependencies = TRUE)
 library(gplots)
 #install.packages("RColorBrewer", dependencies = TRUE)
@@ -29,9 +30,10 @@ heatmap.2(x,
           col=my_palette,       # use on color palette defined earlier
           #breaks=col_breaks,    # enable color transition at specified limits
           dendrogram="row",     # only draw a row dendrogram
-          #Colv="NA",
-          Rowv = as.dendrogram(cluster), # apply default clustering method
-          Colv = as.dendrogram(cluster)) # apply default clustering method)            # turn off column clustering
+          Colv="NA"
+          #Rowv = as.dendrogram(cluster), # apply default clustering method
+          #Colv = as.dendrogram(cluster)
+          ) # apply default clustering method)            # turn off column clustering
 
 dev.off()               # close the PNG device
 
