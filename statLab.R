@@ -220,3 +220,8 @@ importance <- varImp(model, scale=FALSE)
 print(importance)
 # plot importance
 plot(importance)
+
+
+
+library(dplyr)
+mock_data = mutate(mock_data, risk = ifelse(mock_data$V8=="high_risk",1,0))
