@@ -26,7 +26,7 @@ Given labeled data (i.e. TMI vs non-TMI), analyze the diffence in the data behav
 **Mechanism:**  
 * finite mixture models  
 * approximating unknown distributions  
-* pro: if the general population is thought to be composed of distinct sub-populations that are not identifiable based on measured characteristics.  
+* pro: if the general population is thought to be composed of distinct sub-populations, each following a conventional GCM.  
 * con: if you dont know how many sub-populations are there.  
 
 **Algorith:**  
@@ -37,7 +37,9 @@ Given labeled data (i.e. TMI vs non-TMI), analyze the diffence in the data behav
 **Mechanism:**  
 * application of finite mixture  
 * assumes the population is composed of a mixture of distinct groups defined by their `developmental trajectory`.  
+* pro: takes no stand on the population distribution of trajectories and instead uses the trajectory groups as a statistical device for approximating the unknown distribution of trajectories across population members.  
 * 
+
 
 
 
