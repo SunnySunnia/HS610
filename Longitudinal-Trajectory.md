@@ -3,7 +3,7 @@ Given labeled data (i.e. TMI vs non-TMI), analyze the diffence in the data behav
 * What features and how many features to model? ---->`feature selection`  
 * use case: given a value(or set of values) at a time point (9-month-old), assess the risk of having the disease.  
 * so the model has to be sensitive to **time** of course, secondly will be **segmental change over time** from the past of the same subject (i.e. a certain elevation in the features over 3 months will 'qualifies' the subject to a higher risk?) 
-* look for influetial features that help assessing risk (i.e. a boy is more likely to have autism than a girl)  
+* look for influetial **features** that help assessing risk (i.e. a boy is more likely to have autism than a girl)  
 
 
 
