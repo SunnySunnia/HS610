@@ -7,7 +7,6 @@ Given labeled data (i.e. TMI vs non-TMI), analyze the diffence in the data behav
 
 
 
-
 ##Analysis/Modeling approaches:  
 
 ###Growth Curve Modeling (GCM)  
@@ -41,6 +40,9 @@ Given labeled data (i.e. TMI vs non-TMI), analyze the diffence in the data behav
 * 
 
 
+###Software and Packages  
+-----------------  
+**R**: `crimCV`: this software fits finite mixtures of `Zero-inflated Poisson` models to longitudinal count data.  
 
 
 
